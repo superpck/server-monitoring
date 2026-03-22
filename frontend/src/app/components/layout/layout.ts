@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { NgOptimizedImage } from '@angular/common';
 import { PkIcon } from '../../shares/pk-icon';
 import config from '../../configs/config';
 import { ThemeService } from '../../services/theme.service';
@@ -7,7 +8,7 @@ import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, PkIcon],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, PkIcon, NgOptimizedImage],
   templateUrl: './layout.html',
   styleUrl: './layout.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
