@@ -1,0 +1,206 @@
+<main class="overview-monitor">
+
+  @if (loading() && !data()) {
+  <div class="ov-state">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Loading system overview…</p>
+  </div>
+  } @else if (disabled()) {
+  <div class="ov-state ov-state--disabled">
+    <pk-icon name="lock" [size]="40" [strokeWidth]="1.5" />
+    <h3>System Overview Disabled</h3>
+    <p>Set <code>SYSTEM_OVERVIEW_ENABLED=true</code> on this server to enable</p>
+  </div>
+  } @else if (error()) {
+  <div class="ov-state ov-state--error">
+    <pk-icon name="alert-circle" [size]="36" [strokeWidth]="1.5" />
+    <p>{{ error() }}</p>
+  </div>
+  } @else if (data(); as d) {
+
+  <!-- Toolbar -->
+  <div class="ov-toolbar">
+    <span class="ov-collected">Collected: {{ d.collectedAt }}</span>
+    <button type="button" class="ov-reload-btn" [disabled]="loading()" (click)="load()">
+      @if (loading()) {
+      <span class="spinner xs" aria-hidden="true"></span>Refreshing…
+      } @else {
+      ↺ Refresh
+      }
+    </button>
+  </div>
+
+  <div class="ov-sections">
+    <!-- Host -->
+    <section class="ov-card">
+      <h4 class="ov-card-title">
+        <pk-icon name="server" [size]="16" />
+        Host
+      </h4>
+      <dl class="ov-dl">
+        <dt>Hostname</dt>
+        <dd>{{ d.host.hostname }}</dd>
+        <dt>Platform</dt>
+        <dd>{{ d.host.platform }}</dd>
+        <dt>Architecture</dt>
+        <dd>{{ d.host.arch }}</dd>
+        <dt>Timezone</dt>
+        <dd>{{ d.host.timezone }}</dd>
+        <dt>Uptime</dt>
+        <dd>{{ d.host.uptime }}</dd>
+        <dt>uname</dt>
+        <dd class="ov-mono">{{ d.host.uname }}</dd>
+      </dl>
+    </section>
+
+    <!-- Hardware -->
+    <section class="ov-card">
+      <h4 class="ov-card-title">
+        <pk-icon name="cpu" [size]="16" />
+        Hardware
+      </h4>
+      <dl class="ov-dl">
+        @if (d.hardware.manufacturer) {
+        <dt>Manufacturer</dt>
+        <dd>{{ d.hardware.manufacturer }}</dd>
+        }
+        @if (d.hardware.model) {
+        <dt>Model</dt>
+        <dd>{{ d.hardware.model }}</dd>
+        }
+        <dt>CPU</dt>
+        <dd>{{ d.hardware.cpu }}</dd>
+        <dt>Memory</dt>
+        <dd>{{ memGB(d.hardware.memTotalMB) }}</dd>
+        @if (d.hardware.serial) {
+        <dt>Serial</dt>
+        <dd class="ov-mono">{{ d.hardware.serial }}</dd>
+        }
+      </dl>
+    </section>
+
+    <!-- Date / Time -->
+    <section class="ov-card">
+      <h4 class="ov-card-title">
+        <pk-icon name="clock" [size]="16" />
+        Date &amp; Time
+      </h4>
+      <dl class="ov-dl">
+        <dt>Local</dt>
+        <dd>{{ d.date.local }}</dd>
+        <dt>ISO</dt>
+        <dd class="ov-mono">{{ d.date.iso }}</dd>
+      </dl>
+    </section>
+
+    <!-- Active Sessions -->
+    <section class="ov-card ov-card--full">
+      <h4 class="ov-card-title">
+        <pk-icon name="users" [size]="16" />
+        Active Sessions
+        <span class="ov-badge">{{ d.sessions.siUsers.length }}</span>
+      </h4>
+      @if (d.sessions.w) {
+      <pre class="ov-pre">{{ d.sessions.w }}</pre>
+      } @else {
+      <p class="ov-empty">No active sessions</p>
+      }
+    </section>
+
+    <!-- Login History -->
+    <section class="ov-card ov-card--full">
+      <h4 class="ov-card-title">
+        <pk-icon name="log-in" [size]="16" />
+        Login History
+      </h4>
+      @if (lines(d.logins.last).length > 0) {
+      <pre class="ov-pre">{{ d.logins.last }}</pre>
+      } @else {
+      <p class="ov-empty">No login history available</p>
+      }
+    </section>
+
+    <!-- Listening Ports -->
+    <section class="ov-card ov-card--full">
+      <h4 class="ov-card-title">
+        <pk-icon name="wifi" [size]="16" />
+        Listening Ports
+      </h4>
+      @if (d.network.ports) {
+      <pre class="ov-pre">{{ d.network.ports }}</pre>
+      } @else {
+      <p class="ov-empty">No data</p>
+      }
+    </section>
+
+    <!-- Running Services -->
+    <section class="ov-card ov-card--full">
+      <h4 class="ov-card-title ov-card-title--success">
+        <pk-icon name="check-circle" [size]="16" />
+        Running Services
+      </h4>
+      @if (d.services.running) {
+      <pre class="ov-pre ov-pre--sm ov-pre--nowrap">{{ d.services.running }}</pre>
+      } @else {
+      <p class="ov-empty">No data</p>
+      }
+    </section>
+
+    <!-- Failed Services -->
+    <section class="ov-card ov-card--half">
+      <h4 class="ov-card-title ov-card-title--error">
+        <pk-icon name="x-circle" [size]="16" />
+        Failed Services
+      </h4>
+      @if (lines(d.services.failed).length > 0) {
+      <pre class="ov-pre ov-pre--sm ov-pre--nowrap ov-pre--error">{{ d.services.failed }}</pre>
+      } @else {
+      <p class="ov-empty ov-empty--success">No failed services</p>
+      }
+    </section>
+
+    <!-- DNS Servers -->
+    <section class="ov-card">
+      <h4 class="ov-card-title">
+        <pk-icon name="globe" [size]="16" />
+        DNS Servers
+      </h4>
+      @if (d.network.dns) {
+      <pre class="ov-pre ov-pre--sm">{{ d.network.dns }}</pre>
+      } @else {
+      <p class="ov-empty">No DNS data</p>
+      }
+    </section>
+
+    <!-- Environment -->
+    <section class="ov-card">
+      <h4 class="ov-card-title">
+        <pk-icon name="box" [size]="16" />
+        Environment
+      </h4>
+      <dl class="ov-dl">
+        <dt>Node</dt>
+        <dd>{{ d.environment.nodeVersion }}</dd>
+        <dt>User</dt>
+        <dd>{{ d.environment.user }}</dd>
+        <dt>PID</dt>
+        <dd>{{ d.environment.pid }}</dd>
+        <dt>CWD</dt>
+        <dd class="ov-mono">{{ d.environment.cwd }}</dd>
+      </dl>
+    </section>
+
+    <!-- Crontab -->
+    @if (d.crontab) {
+    <section class="ov-card ov-card--full">
+      <h4 class="ov-card-title">
+        <pk-icon name="calendar" [size]="16" />
+        Crontab
+      </h4>
+      <pre class="ov-pre ov-pre--sm">{{ d.crontab }}</pre>
+    </section>
+    }
+  </div>
+  }
+
+</main>

@@ -1,0 +1,37 @@
+@if (isOpen()) {
+<div class="pk-modal-backdrop" role="presentation" (click)="onBackdropClick($event)">
+  <div
+    #panel
+    class="pk-modal-panel"
+    [class.pk-modal-panel--sm]="size() === 'sm'"
+    [class.pk-modal-panel--lg]="size() === 'lg'"
+    [class.pk-modal-panel--xl]="size() === 'xl'"
+    [class.pk-modal-panel--full]="size() === 'full'"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="titleId"
+    tabindex="-1">
+
+    <!-- Header -->
+    <div class="pk-modal-header">
+      <h2 [id]="titleId" class="pk-modal-title">{{ title() }}</h2>
+      <button
+        type="button"
+        class="pk-modal-close"
+        (click)="closed.emit()"
+        aria-label="Close modal">
+        <span aria-hidden="true">✕</span>
+      </button>
+    </div>
+
+    <!-- Body (default slot) -->
+    <div class="pk-modal-body">
+      <ng-content />
+    </div>
+
+    <!-- Footer (named slot — add pk-modal-footer attribute to your element) -->
+    <ng-content select="[pk-modal-footer]" />
+
+  </div>
+</div>
+}

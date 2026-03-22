@@ -1,0 +1,90 @@
+<main class="pm2-monitor">
+  @if (loading() && processes().length === 0) {
+  <div class="loading-state" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Loading PM2 processes...</p>
+  </div>
+  } @else if (error() && processes().length === 0) {
+  <div class="error-state">
+    <pk-icon name="alert-circle" [size]="48" [strokeWidth]="1.5" />
+    <h3>Failed to Load</h3>
+    <p>{{ error() }}</p>
+  </div>
+  } @else if (processes().length === 0) {
+  <div class="empty-state">
+    <pk-icon name="process" [size]="48" [strokeWidth]="1.5" />
+    <h3>No Processes Found</h3>
+    <p>No PM2 processes are currently running</p>
+  </div>
+  } @else {
+  <!-- Charts Section -->
+  @if (hasHistoricalData()) {
+  <div class="charts-section">
+    <div class="chart-container">
+      <h4 class="chart-title">
+        PM2 CPU Usage: <span class="chart-total">
+          {{ avgCpu().toFixed(1) }}%
+        </span>
+        <span class="chart-subtitle">( Total {{ totalCpu().toFixed(1) }}% / {{ cpuCores() }} cores )</span>
+      </h4>
+      <div echarts [options]="cpuChartOption()" class="chart"></div>
+    </div>
+    <div class="chart-container">
+      <h4 class="chart-title">
+        PM2 Memory Usage: <span class="chart-total">{{ totalMemoryFormatted() }}</span>
+        <span class="chart-subtitle">(Last 10 Minutes)</span>
+      </h4>
+      <div echarts [options]="memoryChartOption()" class="chart"></div>
+    </div>
+  </div>
+  }
+
+  <!-- Table Section -->
+  <div class="table-container">
+    <table class="pm2-table">
+      <thead class="sticky-header">
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Status</th>
+          <th>PID</th>
+          <th>CPU</th>
+          <th>Memory</th>
+          <th>Uptime</th>
+          <th>Restarts</th>
+          <th>Mode</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (process of processes(); track process.pid) {
+        <tr [class.row-online]="process.status === 'online'">
+          <td class="cell-id">{{ process.id }}</td>
+          <td class="cell-name">
+            <div class="name-wrapper">
+              <pk-icon name="process" [size]="16" />
+              <span>{{ process.name }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="status-badge" [ngClass]="getStatusClass(process.status)">
+              {{ process.status }}
+            </span>
+          </td>
+          <td class="cell-number">{{ process.pid }}</td>
+          <td class="cell-number">{{ process.cpu.toFixed(1) }}%</td>
+          <td class="cell-number">{{ formatMemory(process.memory) }}</td>
+          <td>{{ formatUptime(process.uptime) }}</td>
+          <td class="cell-number">
+            {{ process.restarts }}
+            @if (process.restarts > 5) {
+            <span class="restarts-warning" title="High restart count">⚠️</span>
+            }
+          </td>
+          <td class="cell-mode">{{ process.exec_mode }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  }
+</main>

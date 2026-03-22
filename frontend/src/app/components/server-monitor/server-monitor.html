@@ -1,0 +1,178 @@
+<main class="main-content">
+  @if (loading()) {
+  <div class="loading-state" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Connecting to servers…</p>
+  </div>
+  }
+
+  <div class="cards-grid">
+    @for (server of servers(); track server.key) {
+    <article class="server-card" [class.server-card--healthy]="server.data?.status?.health === 'healthy'"
+      [class.server-card--warning]="server.data?.status?.health === 'warning'"
+      [class.server-card--critical]="server.data?.status?.health === 'critical'"
+      [class.server-card--offline]="server.error" [attr.aria-label]="'Server: ' + (server.key)">
+      <!-- Card Header -->
+      <div class="card-header">
+        <div class="card-title-group">
+          <h2 class="card-server-name">{{ server.group }}: {{ server.key }}</h2>
+          <span class="card-hostname">{{ server.data?.server?.hostname ?? server.baseUrl }}</span>
+        </div>
+        <div class="card-badges">
+          @if (server.data) {
+          <span class="health-badge" [class.health-badge--healthy]="server.data.status.health === 'healthy'"
+            [class.health-badge--warning]="server.data.status.health === 'warning'"
+            [class.health-badge--critical]="server.data.status.health === 'critical'">
+            {{ server.data.status.health }}
+          </span>
+          }
+          @if (server.error) {
+          <span class="health-badge health-badge--offline">offline</span>
+          }
+        </div>
+      </div>
+
+      @if (server.data; as d) {
+      <!-- Gauges: CPU · Memory · Disk -->
+      <div class="gauges-row">
+        <div class="gauge-wrap">
+          <div echarts [options]="gaugeOption(d.cpu.usage)" class="gauge-chart" aria-hidden="true"></div>
+          <p class="gauge-name">CPU</p>
+          <p class="gauge-sub">{{ d.cpu.cores }} cores</p>
+        </div>
+        <div class="gauge-wrap">
+          <div echarts [options]="gaugeOption(d.memory.usagePercent)" class="gauge-chart" aria-hidden="true"></div>
+          <p class="gauge-name">Memory</p>
+          <p class="gauge-sub">{{ formatBytes(d.memory.used) }} / {{ formatBytes(d.memory.total) }}</p>
+        </div>
+        <div class="gauge-wrap">
+          <div echarts [options]="gaugeOption(d.disk.usagePercent)" class="gauge-chart" aria-hidden="true"></div>
+          <p class="gauge-name">
+            Disk
+            @if (d.disk.type) {
+            <span style="font-size: 0.7em;"> ({{ d.disk.type }})</span>
+            }
+          </p>
+          <p class="gauge-sub">{{ d.disk.mount }} · {{ formatBytes(d.disk.size) }}</p>
+        </div>
+      </div>
+
+      <!-- Load Average -->
+      <div class="section-block">
+        <p class="section-title">Load Average</p>
+        <div echarts [options]="loadBarOption(d.load)" class="load-chart" aria-hidden="true"></div>
+      </div>
+
+      <!-- Info Grid -->
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Uptime</span>
+          <span class="info-value">{{ formatUptime(d.server.uptimeSeconds) }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Processes</span>
+          <span class="info-value">{{ d.process.all }} total &middot; {{ d.process.running }} running</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Network ({{ d.network.iface }})</span>
+          <span class="info-value">↓ {{ formatBytes(d.network.rxBytes) }} &nbsp;↑ {{ formatBytes(d.network.txBytes)
+            }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Hardware</span>
+          <span class="info-value">{{ d.server.model }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Platform</span>
+          <span class="info-value">{{ d.server.platform }}</span>
+        </div>
+        @if (d.server.release) {
+        <div class="info-item">
+          <span class="info-label">OS Release</span>
+          <span class="info-value">{{ d.server.release }}</span>
+        </div>
+        }
+      </div>
+
+      <p class="card-updated">Updated {{ d.status.updatedAt | date:'HH:mm:ss' }}</p>
+      <div class="card-actions">
+        <button type="button" class="card-action-btn" (click)="openNginxLog(server.key, server.agentid)"
+          [attr.aria-label]="'View nginx log for ' + server.key">
+          📋 Nginx Log
+        </button>
+      </div>
+      } @else if (server.error) {
+      <div class="card-offline">
+        <p>Unable to reach server</p>
+        <code>{{ server.baseUrl }}/dashboard/summary</code>
+      </div>
+      } @else {
+      <div class="card-offline">
+        <div class="spinner sm" aria-hidden="true"></div>
+        <p>Connecting…</p>
+      </div>
+      }
+    </article>
+    }
+  </div>
+</main>
+
+<pk-modal [title]="nginxModalTitle()" [isOpen]="nginxModalOpen()" size="xl" (closed)="nginxModalOpen.set(false)">
+  <div class="nginx-tabs">
+    <button type="button" class="nginx-tab" [class.nginx-tab--active]="nginxLogTab() === 'error'"
+      (click)="nginxLogTab.set('error')">
+      Error <span class="nginx-tab-count">{{ nginxErrorLogs().length }}</span>
+    </button>
+    <button type="button" class="nginx-tab" [class.nginx-tab--active]="nginxLogTab() === 'access'"
+      (click)="nginxLogTab.set('access')">
+      Access <span class="nginx-tab-count">{{ nginxAccessLogs().length }}</span>
+    </button>
+  </div>
+  @if (nginxLoading()) {
+  <div class="nginx-state">
+    <div class="spinner sm" aria-hidden="true"></div>
+    <p>Loading logs…</p>
+  </div>
+  } @else if (nginxLogs().length === 0) {
+  <div class="nginx-state">
+    <p>No log entries found</p>
+  </div>
+  } @else {
+  <div class="nginx-table-wrap">
+    <table class="nginx-table">
+      <thead>
+        <tr>
+          <th scope="col">Time</th>
+          <th scope="col">Level</th>
+          <th scope="col">Client</th>
+          <th scope="col">Host</th>
+          <th scope="col">Request</th>
+          <th scope="col">Message</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (e of nginxLogs(); track e.datetime + e.pid) {
+        <tr>
+          <td class="nginx-td-time">{{ e.datetime }}</td>
+          <td><span [class]="'nginx-level nginx-level--' + e.level">{{ e.level }}</span></td>
+          <td class="nginx-td-mono">{{ e.client }}</td>
+          <td class="nginx-td-mono">{{ e.host }}</td>
+          <td class="nginx-td-request" [pkTooltip]="e.request">{{ e.request }}</td>
+          <td class="nginx-td-msg" [pkTooltip]="e.message">{{ e.message }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  }
+  <div pk-modal-footer class="nginx-footer">
+    <span class="nginx-count">{{ nginxLogs().length }} entries</span>
+    <button type="button" class="nginx-reload-btn" [disabled]="nginxLoading()" (click)="reloadNginxLog()">
+      @if (nginxLoading()) {
+      <span class="spinner xs" aria-hidden="true"></span> Loading…
+      } @else {
+      ↺ Reload
+      }
+    </button>
+  </div>
+</pk-modal>

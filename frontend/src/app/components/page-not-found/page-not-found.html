@@ -1,0 +1,19 @@
+<div class="container" role="main">
+  <div class="glitch-wrap" aria-hidden="true">
+    <span class="glitch" data-text="404">404</span>
+  </div>
+
+  <h1 class="title">Page not found</h1>
+  <p class="subtitle">The page you're looking for doesn't exist or has been moved.</p>
+
+  @if (attemptedUrl && attemptedUrl !== '/404') {
+    <p class="attempted-url" aria-label="Attempted URL">{{ attemptedUrl }}</p>
+  }
+
+  <div class="btn-group">
+    <button class="btn-back" type="button" (click)="goBack()">← Go Back</button>
+    <a class="btn-home" routerLink="/monitor">Go to Dashboard</a>
+  </div>
+
+  <div class="grid-bg" aria-hidden="true"></div>
+</div>

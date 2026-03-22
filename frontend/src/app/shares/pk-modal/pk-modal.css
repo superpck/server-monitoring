@@ -1,0 +1,106 @@
+/* ── Backdrop ── */
+.pk-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: pk-backdrop-in 0.18s ease-out;
+}
+
+@keyframes pk-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Panel ── */
+.pk-modal-panel {
+  position: relative;
+  background: var(--bg-modal);
+  border: 1px solid var(--border-modal);
+  border-radius: 16px;
+  box-shadow: var(--shadow-modal);
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  color: var(--color-text);
+  font-family: system-ui, -apple-system, sans-serif;
+  animation: pk-panel-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.2) transparent;
+}
+
+@keyframes pk-panel-in {
+  from { opacity: 0; transform: scale(0.95) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.pk-modal-panel--sm { max-width: 380px; }
+.pk-modal-panel--lg { max-width: 860px; }
+.pk-modal-panel--xl {
+  max-width: min(1280px, calc(100vw - 2rem));
+  width: 100%;
+  max-height: calc(100dvh - 2rem);
+}
+.pk-modal-panel--full {
+  max-width: 100%;
+  width: 100%;
+  max-height: 99dvh;
+  height: 100dvh;
+  border-radius: 0;
+  margin: 0;
+}
+
+/* ── Header ── */
+.pk-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border-modal-inner);
+}
+
+.pk-modal-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-em);
+  line-height: 1.4;
+}
+
+.pk-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-subtle);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.pk-modal-close:hover {
+  background: var(--bg-nav-hover);
+  color: var(--color-text-em);
+}
+
+.pk-modal-close:focus-visible {
+  outline: 2px solid #a78bfa;
+  outline-offset: 2px;
+}
+
+/* ── Body ── */
+.pk-modal-body {
+  padding: 1.25rem 1.5rem;
+}

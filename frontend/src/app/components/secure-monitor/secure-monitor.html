@@ -1,0 +1,73 @@
+<main class="secure-monitor">
+  @if (sourcesLoading() && sources().length === 0) {
+  <div class="sm-state">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Loading secure log sources…</p>
+  </div>
+  } @else if (disabled()) {
+  <div class="sm-state sm-state--disabled">
+    <pk-icon name="lock" [size]="40" [strokeWidth]="1.5" />
+    <h3>Secure Log Disabled</h3>
+    <p>Set <code>SECURE_LOG_ENABLED=true</code> on this server to enable</p>
+  </div>
+  } @else if (sources().length === 0 && error()) {
+  <div class="sm-state sm-state--error">
+    <pk-icon name="alert-circle" [size]="36" [strokeWidth]="1.5" />
+    <p>{{ error() }}</p>
+  </div>
+  } @else {
+
+  <!-- Source Tabs -->
+  <div class="sm-tabs">
+    @for (src of activeSources(); track src.id) {
+    <button type="button" class="sm-tab"
+      [class.sm-tab--active]="activeSource() === src.id"
+      [class.sm-tab--unavailable]="!src.available"
+      [disabled]="!src.available"
+      (click)="selectSource(src.id)"
+      [title]="src.note ?? src.label">
+      {{ src.label }}
+      @if (!src.available) {
+      <span class="sm-tab-na">N/A</span>
+      }
+    </button>
+    }
+    <span class="sm-platform">{{ platform() }}</span>
+  </div>
+
+  <!-- Log Output -->
+  <div class="sm-log-wrap">
+    @if (loading()) {
+    <div class="sm-log-loading">
+      <div class="spinner sm" aria-hidden="true"></div>
+      <span>Loading…</span>
+    </div>
+    } @else if (error()) {
+    <div class="sm-state sm-state--error">
+      <pk-icon name="alert-circle" [size]="24" />
+      <p>{{ error() }}</p>
+    </div>
+    } @else if (logLines().length === 0) {
+    <div class="sm-state">
+      <p>No log entries found</p>
+    </div>
+    } @else {
+    <pre class="sm-log">@for (line of logLines(); track $index) {<span class="sm-line" [class]="lineClass(line)">{{ line }}
+</span>}</pre>
+    }
+  </div>
+
+  <!-- Footer -->
+  <div class="sm-footer">
+    <span class="sm-count">{{ logLines().length }} lines</span>
+    <button type="button" class="sm-reload-btn" [disabled]="loading()" (click)="reload()">
+      @if (loading()) {
+      <span class="spinner xs" aria-hidden="true"></span> Loading…
+      } @else {
+      ↺ Reload
+      }
+    </button>
+  </div>
+
+  }
+</main>

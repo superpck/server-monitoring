@@ -1,0 +1,21 @@
+<div class="pk-toast-container" aria-live="polite" aria-atomic="false">
+  @for (toast of svc.toasts(); track toast.id) {
+  <div
+    class="pk-toast"
+    [class]="'pk-toast pk-toast--' + toast.type"
+    role="alert">
+    <span class="pk-toast-icon" [innerHTML]="icon[toast.type]"></span>
+    <div class="pk-toast-body">
+      @if (toast.title) {
+      <p class="pk-toast-title">{{ toast.title }}</p>
+      }
+      <p class="pk-toast-message">{{ toast.message }}</p>
+    </div>
+    <button
+      type="button"
+      class="pk-toast-close"
+      (click)="svc.dismiss(toast.id)"
+      aria-label="Dismiss notification">✕</button>
+  </div>
+  }
+</div>

@@ -1,0 +1,608 @@
+/* ─── Page ─────────────────────────────────────────────── */
+.alive-page {
+  padding: 24px;
+  min-height: 100vh;
+  /* overflow-x: auto; */
+  min-width: max-content;
+}
+
+.alive-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.alive-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary, #f1f5f9);
+  margin: 0;
+}
+
+/* ─── Layout toggle ─────────────────────────────────────── */
+.layout-toggle {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.layout-btn {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: transparent;
+  color: var(--text-secondary, #94a3b8);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.layout-btn:hover {
+  border-color: rgba(148, 163, 184, 0.4);
+  color: var(--text-primary, #f1f5f9);
+}
+
+.layout-btn--active {
+  background: rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+}
+
+.alive-refresh-badge {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.alive-lastupdate-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--badge-green-bg);
+  color: var(--badge-green-color);
+  border: 1px solid var(--badge-green-border);
+  transition: color 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+}
+
+.alive-lastupdate-badge::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--badge-green-dot);
+  box-shadow: 0 0 4px var(--badge-green-dot);
+  animation: badge-blink 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes badge-blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.3;
+    box-shadow: none;
+  }
+}
+
+/* ─── Tree layout ───────────────────────────────────────── */
+.tree-root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.root-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tree-groups-row {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+.tree-group-col {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Horizontal line through the top connector of each group */
+.tree-group-col::before {
+  content: '';
+  position: absolute;
+  top: 0px;
+  /* midpoint of 28px connector--up */
+  left: -12px;
+  /* extend half of gap:24px into adjacent gap */
+  right: -12px;
+  height: 2px;
+  background: var(--tree-line-color);
+  z-index: 0;
+}
+
+.tree-group-col:first-child::before {
+  left: 50%;
+}
+
+.tree-group-col:last-child::before {
+  right: 50%;
+}
+
+.tree-agents-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+.tree-agent-col {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Horizontal line through the top connector of each agent */
+.tree-agent-col::before {
+  content: '';
+  position: absolute;
+  top: 0px;
+  /* midpoint of 16px connector--short */
+  left: -6px;
+  /* extend half of gap:12px into adjacent gap */
+  right: -6px;
+  height: 2px;
+  background: var(--tree-line-color);
+  z-index: 0;
+}
+
+.tree-agent-col:first-child::before {
+  left: 50%;
+}
+
+.tree-agent-col:last-child::before {
+  right: 50%;
+}
+
+/* ─── Connectors ────────────────────────────────────────── */
+.tree-connector {
+  width: 2px;
+  background: var(--tree-line-color);
+  position: relative;
+  z-index: 1;
+}
+
+.tree-connector--down {
+  height: 28px;
+}
+
+.tree-connector--up {
+  height: 28px;
+}
+
+.tree-connector--short {
+  height: 16px;
+}
+
+.tree--vertical .tree-groups-row .tree-group-col {
+  /* height: 40px; */
+}
+
+/* ─── Node Cards ────────────────────────────────────────── */
+.node-card {
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-card);
+  cursor: default;
+  min-width: 120px;
+  justify-content: center;
+}
+
+.node-card--root {
+  font-size: 0.95rem;
+  font-weight: 600;
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+  min-width: 110px;
+}
+
+.node-card--group {
+  font-size: 0.85rem;
+  font-weight: 600;
+  /* background: rgba(167, 139, 250, 0.08); */
+  border-color: rgba(167, 139, 250, 0.35);
+  color: #b42af4;
+  min-width: 140px;
+}
+
+.group-name {
+  flex: 1;
+  text-align: center;
+}
+
+.group-count {
+  font-size: 0.7rem;
+  background: rgba(61, 1, 125, 0.725);
+  color: #f6befb;
+  border-radius: 999px;
+  padding: 1px 6px;
+}
+
+/* ─── Agent card (button) ───────────────────────────────── */
+.node-card--agent {
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  min-width: 110px;
+  max-width: 140px;
+  font-family: inherit;
+  text-align: center;
+  padding: 10px 12px;
+  background-color: var(--bg-surface-3);
+}
+
+.node-card--agent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* status border tint */
+.node-card--agent.status--green {
+  border-color: rgba(74, 222, 128, 0.5);
+}
+
+.node-card--agent.status--yellow {
+  border-color: rgba(251, 191, 36, 0.5);
+}
+
+.node-card--agent.status--red {
+  border-color: rgba(248, 113, 113, 0.5);
+}
+
+.node-card--agent.status--offline {
+  border-color: rgba(100, 116, 139, 0.3);
+}
+
+.node-card--agent.status--loading {
+  border-color: rgba(100, 116, 139, 0.3);
+  opacity: 0.6;
+}
+
+.agent-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-primary, #f1f5f9);
+  word-break: break-word;
+}
+
+/* ─── Status dot ─────────────────────────────────────────── */
+.agent-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.agent-status-dot.status--green {
+  background: #4ade80;
+  box-shadow: 0 0 6px #4ade80;
+}
+
+.agent-status-dot.status--yellow {
+  background: #fbbf24;
+  box-shadow: 0 0 6px #fbbf24;
+}
+
+.agent-status-dot.status--red {
+  background: #f87171;
+  box-shadow: 0 0 6px #f87171;
+}
+
+.agent-status-dot.status--offline {
+  background: #475569;
+}
+
+.agent-status-dot.status--loading {
+  background: #475569;
+  animation: pulse-dot 1s infinite;
+}
+
+@keyframes pulse-dot {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* ─── Metric pills ──────────────────────────────────────── */
+.agent-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+}
+
+.metric-pill {
+  font-size: 0.65rem;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.metric--green {
+  background: rgba(74, 222, 128, 0.15);
+  color: #4ade80;
+}
+
+.metric--yellow {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+}
+
+.metric--red {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+}
+
+.metric--offline1 {
+  background: rgb(255, 0, 0);
+  color: #ffffff;
+}
+.metric--offline {
+  background: var(--bg-error);
+  color: var(--color-text-error);
+}
+
+.metric--null {
+  background: rgba(100, 116, 139, 0.15);
+  color: var(--color-text-muted);
+}
+
+/* ─── Modal body ────────────────────────────────────────── */
+.modal-body {
+  padding: 4px 0 8px;
+}
+
+.modal-offline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 0;
+  color: var(--text-secondary);
+}
+
+.modal-section {
+  margin-bottom: 20px;
+}
+
+.modal-section-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  margin: 0 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.modal-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.modal-label {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.modal-value {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.modal-value.metric--green {
+  color: #4ade80;
+}
+
+.modal-value.metric--yellow {
+  color: #fbbf24;
+}
+
+.modal-value.metric--red {
+  color: #f87171;
+}
+
+.modal-value.metric--null {
+  color: #64748b;
+}
+
+/* ─── Status badge ──────────────────────────────────────── */
+.status-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.status-badge--offline {
+  background: rgba(100, 116, 139, 0.2);
+  color: #94a3b8;
+}
+
+.status-badge[data-health="healthy"] {
+  background: rgba(74, 222, 128, 0.15);
+  color: #4ade80;
+}
+
+.status-badge[data-health="warning"] {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+}
+
+.status-badge[data-health="critical"] {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+}
+
+/* ─── Vertical Tree Mode ─────────────────────────────────── */
+
+/* Left-align the entire tree */
+.tree--vertical {
+  align-items: flex-start;
+}
+
+.tree--vertical .group-name {
+  text-align: left;
+}
+
+.tree--vertical .node-card--group {
+  min-width: 180px;
+}
+
+/* Hide root-to-groups vertical connector; the border-left acts as trunk */
+.tree--vertical .root-node>.tree-connector--down {
+  display: none;
+}
+
+/* Groups stack vertically; trunk drawn per-item via ::after */
+.tree--vertical .tree-groups-row {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 20px;
+  margin-top: 12px;
+  margin-left: 72px;
+}
+
+/* Override: repurpose horizontal group bar → horizontal branch from trunk */
+.tree--vertical .tree-group-col::before {
+  left: 0;
+  right: auto;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 2px;
+  z-index: 1;
+}
+
+/* Reset first/last-child overrides from horizontal mode */
+.tree--vertical .tree-group-col:first-child::before,
+.tree--vertical .tree-group-col:last-child::before {
+  left: 0;
+  right: auto;
+}
+
+/* Each group row is now horizontal: branch → group card → connector → agents */
+.tree--vertical .tree-group-col {
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+}
+
+/* tree-connector--up: transparent spacer matching branch width */
+.tree--vertical .tree-group-col>.tree-connector--up {
+  width: 28px;
+  height: 2px;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+/* tree-connector--down: horizontal dash from group card → agents */
+.tree--vertical .tree-group-col>.tree-connector--down {
+  width: 20px;
+  height: 2px;
+  flex-shrink: 0;
+}
+
+/* Agents row: allow wrapping to avoid horizontal overflow */
+.tree--vertical .tree-agents-row {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+/* Agent-col: hide the per-agent short stub & horizontal connecting bar in vertical mode */
+.tree--vertical .tree-agent-col::before {
+  display: none;
+}
+
+.tree--vertical .tree-agent-col>.tree-connector--short {
+  display: none;
+}
+
+/* Trunk per group-col: each item draws its own vertical segment via ::after.
+   Middle items extend ±10px into gap (gap=20px) to connect seamlessly.
+   First child: top:0 — line starts at top of first group (unchanged behaviour).
+   Last child: bottom:50% — line stops at vertical center of the last group card. */
+.tree--vertical .tree-group-col::after {
+  content: '';
+  position: absolute;
+  left: -1px;
+  width: 2px;
+  background: var(--tree-line-color);
+  z-index: 0;
+  top: -10px;
+  bottom: -10px;
+}
+
+.tree--vertical .tree-group-col:first-child::after {
+  top: 0;
+}
+
+.tree--vertical .tree-group-col:last-child::after {
+  bottom: 50%;
+}
+
+/* Single group: no trunk needed */
+.tree--vertical .tree-group-col:first-child:last-child::after {
+  display: none;
+}

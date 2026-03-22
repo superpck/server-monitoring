@@ -1,0 +1,157 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import "tailwindcss";
+@import "./app/shares/pk-tooltip/pk-tooltip.css";
+
+/* ── Theme CSS Custom Properties ── */
+:root {
+  --bg-default: linear-gradient(135deg, #1e508e 0%, #123969 30%, #082141 80%, #041427 100%);
+  --bg-page: linear-gradient(135deg, #0f172a 0%, #0c2340 55%, #0f172a 100%);
+  --bg-nav: rgba(15, 23, 42, 0.92);
+  --bg-nav-hover: rgba(148, 163, 184, 0.08);
+  --bg-surface: rgba(30, 41, 59, 0.7);
+  --bg-surface-2: rgba(15, 23, 42, 0.5);
+  --bg-surface-3: rgba(15, 23, 42, 0.6);
+  --bg-surface-4: rgba(44, 49, 60, 0.6);
+  --bg-secondary: rgba(15, 23, 42, 0.55);
+  --bg-tertiary: rgba(30, 41, 59, 0.85);
+  --bg-hover: rgba(148, 163, 184, 0.08);
+  --bg-input: rgba(15, 23, 42, 0.8);
+  --bg-error: rgba(71, 67, 67, 0.8);
+  --bg-modal: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(12, 35, 64, 0.98) 100%);
+
+  --primary-color: #3b82f6;
+
+  --color-text: #f1f5f9;
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --color-text-em: #e2e8f0;
+  --color-text-secondary: #97a2af;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #475569;
+  --color-text-error: #f96d6d;
+
+  --border-color: rgba(148, 163, 184, 0.12);
+  --border-color-2: rgba(148, 163, 184, 0.08);
+  --border-modal: rgba(148, 163, 184, 0.15);
+  --border-modal-inner: rgba(148, 163, 184, 0.08);
+
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --shadow-modal: 0 25px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+  --badge-green-bg: rgba(74, 222, 128, 0.1);
+  --badge-green-color: #4ade80;
+  --badge-green-border: rgba(74, 222, 128, 0.25);
+  --badge-green-dot: #4ade80;
+
+  --tree-line-color: rgba(100, 116, 139, 0.3);
+}
+
+:root[data-theme="light"] {
+  --bg-default: #fff;
+  --bg-page: linear-gradient(135deg, #f0f4ff 0%, #e8effa 55%, #f0f4ff 100%);
+  --bg-nav: rgba(255, 255, 255, 0.92);
+  --bg-nav-hover: rgba(15, 23, 42, 0.06);
+  --bg-surface: rgba(255, 255, 255, 0.85);
+  --bg-surface-2: rgba(248, 250, 252, 0.9);
+  --bg-surface-3: rgba(241, 245, 249, 0.85);
+  --bg-surface-4: rgba(225, 238, 253, 0.85);
+  --bg-secondary: rgba(248, 250, 252, 0.85);
+  --bg-tertiary: rgba(241, 245, 249, 0.95);
+  --bg-hover: rgba(15, 23, 42, 0.06);
+  --bg-input: rgba(255, 255, 255, 0.9);
+  --bg-error: rgba(223, 11, 11, 0.8);
+  --bg-modal: linear-gradient(135deg, rgba(255, 255, 255, 0.99) 0%, rgba(248, 250, 252, 0.99) 100%);
+
+  --primary-color: #004cf1;
+
+  --color-text: #0f172a;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --color-text-em: #1e293b;
+  --color-text-secondary: #334155;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
+  --color-text-error: #f8dada;
+
+  --border-color: rgba(15, 23, 42, 0.12);
+  --border-color-2: rgba(15, 23, 42, 0.07);
+  --border-modal: rgba(15, 23, 42, 0.12);
+  --border-modal-inner: rgba(15, 23, 42, 0.08);
+
+  --shadow-card: 0 4px 20px rgba(15, 23, 42, 0.1);
+  --shadow-modal: 0 25px 60px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.05);
+
+  --badge-green-bg: rgba(22, 163, 74, 0.1);
+  --badge-green-color: #15803d;
+  --badge-green-border: rgba(22, 163, 74, 0.3);
+  --badge-green-dot: #16a34a;
+
+  --tree-line-color: rgba(15, 23, 42, 0.2);
+}
+
+/* ── Blink animation ── */
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+/* hidden window = 12.5% of cycle → ≤ 0.5s dark for cycles ≤ 4s */
+@keyframes blink-limited {
+
+  0%,
+  62.5% {
+    opacity: 1;
+  }
+
+  75% {
+    opacity: 0.1;
+  }
+
+  87.5% {
+    opacity: 0.6;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.blink {
+  /* step-start: hidden = 0.5s (50% of 1s) */
+  animation: blink 1s step-start infinite;
+}
+
+.blink-smooth {
+  /* linear + narrow window: hidden ≈ 0.25s (12.5% of 2s) */
+  animation: blink 2s linear infinite;
+}
+
+.blink-slow {
+  /* linear + narrow window: hidden ≈ 0.5s (12.5% of 4s) */
+  animation: blink-limited 4s linear infinite;
+}
+
+.blink-fast {
+  /* step-start: hidden = 0.25s (50% of 0.5s) */
+  animation: blink 0.5s step-start infinite;
+}
+
+.sticky-header {
+  position: sticky;
+  top: 0;
+  background-color: var(--bg-secondary);
+  z-index: 1;
+}
+
+::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.3;
+}

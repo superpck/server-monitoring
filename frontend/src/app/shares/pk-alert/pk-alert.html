@@ -1,0 +1,61 @@
+@if (svc.current(); as config) {
+<div
+  class="pk-alert-backdrop"
+  role="presentation"
+  (click)="onBackdropClick($event)">
+
+  <div
+    #panel
+    class="pk-alert-panel"
+    [class]="'pk-alert-panel pk-alert-panel--' + config.type"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="pk-alert-title"
+    aria-describedby="pk-alert-msg"
+    tabindex="-1">
+
+    <!-- Icon -->
+    <div class="pk-alert-icon-wrap" [class]="'pk-alert-icon-wrap--' + config.type" aria-hidden="true">
+      <span class="pk-alert-icon">{{ icon[config.type] }}</span>
+    </div>
+
+    <!-- Title -->
+    @if (config.title) {
+    <h2 id="pk-alert-title" class="pk-alert-title">{{ config.title }}</h2>
+    }
+
+    <!-- Message -->
+    <p id="pk-alert-msg" class="pk-alert-message">{{ config.message }}</p>
+
+    <!-- Input field -->
+    @if (config.type === 'input') {
+    <input
+      #inputField
+      type="text"
+      class="pk-alert-input"
+      [placeholder]="config.placeholder"
+      [value]="inputValue()"
+      (input)="inputValue.set($any($event.target).value)"
+      (keydown)="onInputKeydown($event)"
+      aria-label="Input" />
+    }
+
+    <!-- Actions -->
+    <div class="pk-alert-actions" [class.pk-alert-actions--single]="!isActionType()">
+      @if (isActionType()) {
+      <button type="button" class="pk-alert-btn pk-alert-btn--cancel" (click)="cancel()">
+        {{ config.cancelText }}
+      </button>
+      }
+      <button
+        type="button"
+        class="pk-alert-btn"
+        [class]="'pk-alert-btn pk-alert-btn--confirm pk-alert-btn--' + config.type"
+        (click)="confirm()">
+        {{ config.confirmText }}
+      </button>
+    </div>
+
+  </div>
+</div>
+}

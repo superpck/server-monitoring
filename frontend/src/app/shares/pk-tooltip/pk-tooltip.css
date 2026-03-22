@@ -1,0 +1,48 @@
+.pk-tooltip {
+  position: fixed;
+  z-index: 10000;
+  max-width: 320px;
+  padding: 0.5rem 0.75rem;
+  background: rgba(30, 41, 59, 0.98);
+  color: #f1f5f9;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  word-wrap: break-word;
+  pointer-events: none;
+  animation: pk-tooltip-fade-in 0.15s ease-out;
+}
+
+:root[data-theme="light"] .pk-tooltip {
+  background: rgba(30, 41, 59, 0.95);
+  color: #f1f5f9;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes pk-tooltip-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.pk-tooltip--top {
+  transform-origin: bottom center;
+}
+
+.pk-tooltip--bottom {
+  transform-origin: top center;
+}
+
+.pk-tooltip--left {
+  transform-origin: right center;
+}
+
+.pk-tooltip--right {
+  transform-origin: left center;
+}

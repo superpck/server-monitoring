@@ -1,0 +1,110 @@
+<main class="about-page">
+
+  <!-- ── Hero ── -->
+  <section class="about-hero">
+    <div class="about-hero-glow" aria-hidden="true"></div>
+    <div class="about-pulse-ring" aria-hidden="true">
+      <div class="about-pulse-dot"></div>
+    </div>
+    <h1 class="about-title">{{ appName }}</h1>
+    <p class="about-subtitle">Server Monitoring Dashboard</p>
+    <div class="about-version-row">
+      <span class="about-version-badge">v{{ version }}</span>
+      <span class="about-subver">{{ subVersion }}</span>
+    </div>
+  </section>
+
+  <!-- ── Workflow ── -->
+  <section class="about-card">
+    <h2 class="about-card-title">
+      <pk-icon name="git-merge" [size]="15" />
+      Application Workflow
+    </h2>
+    <div class="about-flow">
+      <div class="about-flow-node">
+        <div class="about-flow-icon about-flow-icon--blue">
+          <pk-icon name="monitor" [size]="20" />
+        </div>
+        <span class="about-flow-label">Frontend</span>
+        <span class="about-flow-sub">Angular Dashboard</span>
+      </div>
+      <div class="about-flow-connector">
+        <div class="about-flow-line"></div>
+        <pk-icon name="arrow-right" [size]="14" />
+        <div class="about-flow-line"></div>
+      </div>
+      <div class="about-flow-node">
+        <div class="about-flow-icon about-flow-icon--purple">
+          <pk-icon name="zap" [size]="20" />
+        </div>
+        <span class="about-flow-label">API Gateway</span>
+        <span class="about-flow-sub">Node.js / Express</span>
+      </div>
+      <div class="about-flow-connector">
+        <div class="about-flow-line"></div>
+        <pk-icon name="arrow-right" [size]="14" />
+        <div class="about-flow-line"></div>
+      </div>
+      <div class="about-flow-node">
+        <div class="about-flow-icon about-flow-icon--green">
+          <pk-icon name="server" [size]="20" />
+        </div>
+        <span class="about-flow-label">Server Agents</span>
+        <span class="about-flow-sub">Remote Instances</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Tech Stack ── -->
+  <section class="about-card">
+    <h2 class="about-card-title">
+      <pk-icon name="layers" [size]="15" />
+      Technology Stack
+    </h2>
+    <div class="about-tech-grid">
+      <div class="about-tech-item">
+        <span class="about-tech-dot about-tech-dot--red"></span>
+        <div>
+          <div class="about-tech-name"><a href="https://angular.io/" target="_blank" rel="noopener noreferrer">Angular {{ angularVersion }}</a></div>
+          <div class="about-tech-desc">Frontend framework</div>
+        </div>
+      </div>
+      <div class="about-tech-item">
+        <span class="about-tech-dot about-tech-dot--blue"></span>
+        <div>
+          <div class="about-tech-name"><a href="https://www.typescriptlang.org/" target="_blank" rel="noopener noreferrer">TypeScript 5.9.2</a></div>
+          <div class="about-tech-desc">Type-safe development</div>
+        </div>
+      </div>
+      <div class="about-tech-item">
+        <span class="about-tech-dot about-tech-dot--yellow"></span>
+        <div>
+          <div class="about-tech-name"><a href="https://echarts.apache.org/" target="_blank" rel="noopener noreferrer">echarts 6.0.0</a></div>
+          <div class="about-tech-desc">Data visualization</div>
+        </div>
+      </div>
+      <div class="about-tech-item">
+        <span class="about-tech-dot about-tech-dot--purple"></span>
+        <div>
+          <div class="about-tech-name"><a href="https://xieziyu.github.io/ngx-echarts/" target="_blank" rel="noopener noreferrer">ngx-echarts 21.0.0</a></div>
+          <div class="about-tech-desc">Angular ECharts integration</div>
+        </div>
+      </div>
+      <div class="about-tech-item">
+        <span class="about-tech-dot about-tech-dot--green"></span>
+        <div>
+          <div class="about-tech-name"><a href="https://nodejs.org/" target="_blank" rel="noopener noreferrer">Node.js 24.12.0</a></div>
+          <div class="about-tech-desc">Backend runtime</div>
+        </div>
+      </div>
+      <div class="about-tech-item">
+        <span class="about-tech-dot about-tech-dot--cyan"></span>
+        <div>
+          <div class="about-tech-name"><a href="https://expressjs.com/" target="_blank" rel="noopener noreferrer">Express 5.2.1</a></div>
+          <div class="about-tech-desc">API framework</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>

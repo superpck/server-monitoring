@@ -1,0 +1,251 @@
+<div class="alive-page">
+  <div class="alive-header">
+    <h1 class="alive-title">Server Alive</h1>
+    <span class="alive-refresh-badge">Auto-refresh 10s</span>
+    @if (lastProcess()) {
+    <span class="alive-lastupdate-badge">Last update: {{ lastProcess() | date:'HH:mm:ss' }}</span>
+    }
+    <div class="layout-toggle">
+      <button type="button" class="layout-btn" [class.layout-btn--active]="layout() === 'horizontal'"
+        (click)="setLayout('horizontal')" [pkTooltip]="'Horizontal layout'" [pkTooltipPosition]="'left'">↔ H</button>
+      <button type="button" class="layout-btn" [class.layout-btn--active]="layout() === 'vertical'"
+        (click)="setLayout('vertical')" [pkTooltip]="'Vertical layout'">↕ V</button>
+    </div>
+  </div>
+
+  <!-- Tree: Server root -->
+  <div class="tree-root" [class.tree--vertical]="layout() === 'vertical'">
+    <div class="root-node">
+      <div class="node-card node-card--root">
+        <pk-icon name="server" [size]="22" />
+        <span>Server Group</span>
+      </div>
+      <!-- connector line down -->
+      <div class="tree-connector tree-connector--down"></div>
+    </div>
+
+    <!-- Groups row -->
+    <div class="tree-groups-row">
+      @for (group of groups(); track group.group) {
+      <div class="tree-group-col">
+        <!-- connector line up to root -->
+        <div class="tree-connector tree-connector--up"></div>
+
+        <div class="node-card node-card--group" [pkTooltip]="group.detail">
+          <span class="group-name">{{ group.group }}</span>
+          <span class="group-count">{{ group.agents.length }}</span>
+        </div>
+
+        <!-- connector line down to agents -->
+        <div class="tree-connector tree-connector--down"></div>
+
+        <!-- Agents row -->
+        <div class="tree-agents-row">
+          @for (agent of group.agents; track agent.key) {
+          <div class="tree-agent-col" [pkTooltip]="agent.detail || ''">
+            <div class="tree-connector tree-connector--up tree-connector--short"></div>
+            <button type="button" class="node-card node-card--agent"
+              [class]="'node-card node-card--agent ' + statusClass(agent)" (click)="openModal(agent)">
+              <span class="agent-status-dot" [class]="'agent-status-dot ' + statusClass(agent)"></span>
+              <span class="agent-name">{{ agent.key }}</span>
+              @if (!agent.loading && agent.alive) {
+              <div class="agent-metrics">
+                <span class="metric-pill" [class]="metricClass(agent.alive.cpu.usage)">
+                  CPU {{ agent.alive.cpu.usage | number:'1.1-1' }}%
+                </span>
+                <span class="metric-pill" [class]="metricClass(agent.alive.memory.usagePercent)">
+                  MEM {{ agent.alive.memory.usagePercent | number:'1.1-1' }}%
+                </span>
+                <span class="metric-pill" [class]="metricClass(agent.alive.disk.usagePercent)">
+                  DISK {{ agent.alive.disk.usagePercent | number:'1.1-1' }}%
+                </span>
+              </div>
+              } @else if (agent.loading) {
+              <div class="agent-metrics">
+                <span class="metric-pill metric--null blink-smooth">Loading…</span>
+              </div>
+              } @else {
+              <div class="agent-metrics">
+                <span class="metric-pill metric--offline blink-slow">{{ agent.error || 'Not found' }}</span>
+              </div>
+              }
+            </button>
+          </div>
+          }
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<pk-modal [title]="modalAgent()?.key ?? ''" [isOpen]="modalOpen()" size="lg" (closed)="closeModal()">
+  @if (modalAgent(); as agent) {
+  <div class="modal-body">
+    @if (!agent.alive) {
+    <div class="modal-offline">
+      <span class="status-badge status-badge--offline">Offline</span>
+      <p>Unable to reach <strong>{{ agent.baseUrl }}</strong></p>
+    </div>
+    } @else {
+    <!-- Server Info -->
+    <section class="modal-section">
+      <h3 class="modal-section-title">Server</h3>
+      <div class="modal-grid">
+        <div class="modal-item">
+          <span class="modal-label">Hostname</span>
+          <span class="modal-value">{{ agent.alive.server.hostname }}</span>
+        </div>
+        <div class="modal-item">
+          <span class="modal-label">Platform</span>
+          <span class="modal-value">{{ agent.alive.server.platform }}</span>
+        </div>
+        <div class="modal-item">
+          <span class="modal-label">Uptime</span>
+          <span class="modal-value">{{ formatUptime(agent.alive.server.uptimeSeconds || 0) }}</span>
+        </div>
+        <div class="modal-item">
+          <span class="modal-label">Health</span>
+          <span class="modal-value status-badge" [attr.data-health]="agent.alive.status.health">
+            {{ agent.alive.status.health }}
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- CPU & Load -->
+    <section class="modal-section">
+      <h3 class="modal-section-title">CPU & Load</h3>
+      <div class="modal-grid">
+        <div class="modal-item">
+          <span class="modal-label">CPU Usage</span>
+          <span class="modal-value" [class]="metricClass(agent.alive.cpu.usage)">
+            {{ agent.alive.cpu.usage | number:'1.1-1' }}%
+          </span>
+        </div>
+        <div class="modal-item">
+          <span class="modal-label">CPU Cores</span>
+          <span class="modal-value">{{ agent.alive.cpu.cores }}</span>
+        </div>
+        <div class="modal-item">
+          <span class="modal-label">Load 1m</span>
+          <span class="modal-value" [class]="metricClass(agent.alive.load.loadPercent1m)">
+            {{ agent.alive.load.load1 }} ({{ agent.alive.load.loadPercent1m | number:'1.0-0' }}%)
+          </span>
+        </div>
+        <div class="modal-item">
+          <span class="modal-label">Load 5m / 15m</span>
+          <span class="modal-value">{{ agent.alive.load.load5 }} / {{ agent.alive.load.load15 }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Memory -->
+    <section class="modal-section">
+      <h3 class="modal-section-title">Memory</h3>
+      <div class="modal-grid">
+        <div class="modal-item">
+          <span class="modal-label">Usage</span>
+          <span class="modal-value" [class]="metricClass(agent.alive.memory.usagePercent)">
+            {{ agent.alive.memory.usagePercent | number:'1.1-1' }}%
+          </span>
+        </div>
+        <div class="modal-item">
+          <span class="modal-label">Used / Total</span>
+          <span class="modal-value">
+            {{ formatBytes(agent.alive.memory.used || 0) }} /
+            {{ formatBytes(agent.alive.memory.total || 0) }}
+          </span>
+        </div>
+        <div class="modal-item">
+          <span class="modal-label">Free</span>
+          <span class="modal-value">{{ formatBytes(agent.alive.memory.free || 0) }}</span>
+        </div>
+        <div class="modal-item">
+          <span class="modal-label">Available</span>
+          <span class="modal-value">{{ formatBytes(agent.alive.memory.available || 0) }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Disk -->
+    <section class="modal-section">
+      <h3 class="modal-section-title">Disk</h3>
+      <div class="modal-grid">
+        <div class="modal-item">
+          <span class="modal-label">Usage</span>
+          <span class="modal-value" [class]="metricClass(agent.alive.disk.usagePercent)">
+            {{ agent.alive.disk.usagePercent | number:'1.1-1' }}%
+          </span>
+        </div>
+        <div class="modal-item">
+          <span class="modal-label">Used / Size</span>
+          <span class="modal-value">
+            {{ formatBytes(agent.alive.disk.used || 0) }} /
+            {{ formatBytes(agent.alive.disk.size || 0) }}
+          </span>
+        </div>
+        <div class="modal-item">
+          <span class="modal-label">Mount</span>
+          <span class="modal-value">{{ agent.alive.disk.mount }}</span>
+        </div>
+        <div class="modal-item">
+          <span class="modal-label">Type</span>
+          <span class="modal-value">{{ agent.alive.disk.type }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Network -->
+    <section class="modal-section">
+      <h3 class="modal-section-title">Network</h3>
+      <div class="modal-grid">
+        <div class="modal-item">
+          <span class="modal-label">Interface</span>
+          <span class="modal-value">{{ agent.alive.network.iface }}</span>
+        </div>
+        <div class="modal-item">
+          <span class="modal-label">RX / TX Total</span>
+          <span class="modal-value">
+            {{ formatBytes(agent.alive.network.rxBytes || 0) }} /
+            {{ formatBytes(agent.alive.network.txBytes || 0) }}
+          </span>
+        </div>
+        <div class="modal-item">
+          <span class="modal-label">RX Speed</span>
+          <span class="modal-value">{{ formatBytes(agent.alive.network.rxSec ?? 0) }}/s</span>
+        </div>
+        <div class="modal-item">
+          <span class="modal-label">TX Speed</span>
+          <span class="modal-value">{{ formatBytes(agent.alive.network.txSec ?? 0) }}/s</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Processes -->
+    <section class="modal-section">
+      <h3 class="modal-section-title">Processes</h3>
+      <div class="modal-grid">
+        <div class="modal-item">
+          <span class="modal-label">All</span>
+          <span class="modal-value">{{ agent.alive.process.all }}</span>
+        </div>
+        <div class="modal-item">
+          <span class="modal-label">Running</span>
+          <span class="modal-value">{{ agent.alive.process.running }}</span>
+        </div>
+        <div class="modal-item">
+          <span class="modal-label">Blocked</span>
+          <span class="modal-value">{{ agent.alive.process.blocked }}</span>
+        </div>
+        <div class="modal-item">
+          <span class="modal-label">Sleeping</span>
+          <span class="modal-value">{{ agent.alive.process.sleeping }}</span>
+        </div>
+      </div>
+    </section>
+    }
+  </div>
+  }
+</pk-modal>

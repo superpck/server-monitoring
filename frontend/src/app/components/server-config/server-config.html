@@ -1,0 +1,275 @@
+<div class="sc-page">
+  <div class="sc-header">
+    <div class="sc-title-row">
+      <pk-icon name="server" [size]="20" />
+      <h1 class="sc-title">Server Configuration</h1>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="openAddGroup()">
+      + Add Group
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="sc-loading">
+      <span class="spinner"></span> Loading…
+    </div>
+  } @else if (groups().length === 0) {
+    <div class="sc-empty">
+      <pk-icon name="server" [size]="40" />
+      <p>No data yet — click "Add Group" to get started.</p>
+    </div>
+  } @else {
+    <div class="sc-groups">
+      @for (group of groups(); track group.groupid) {
+        <div class="sc-group-card" [class.sc-group-collapsed]="collapsedGroups().has(group.groupid)">
+          <div class="sc-group-header">
+            <div class="sc-group-left">
+              <button type="button" class="sc-collapse-btn"
+                (click)="toggleCollapse(group.groupid)"
+                [attr.aria-expanded]="!collapsedGroups().has(group.groupid)"
+                [attr.aria-label]="(collapsedGroups().has(group.groupid) ? 'Expand' : 'Collapse') + ' ' + group.group">
+                <pk-icon name="chevron-down" [size]="16" />
+              </button>
+              <div class="sc-group-info" (click)="toggleCollapse(group.groupid)">
+                <span class="sc-group-name">{{ group.group }}</span>
+                @if (group.detail) {
+                  <span class="sc-group-detail">{{ group.detail }}</span>
+                }
+                <span class="sc-group-detail" style="margin-left: 10px; color: rgb(140, 140, 101);">{{ group.agents.length }} agents</span>
+              </div>
+            </div>
+            <div class="sc-group-actions">
+              <button type="button" class="btn btn-sm btn-ghost" title="Add Agent"
+                (click)="openAddAgent(group.groupid)">
+                + Add Agent
+              </button>
+              <button type="button" class="btn btn-sm btn-ghost" title="Edit Group"
+                (click)="openEditGroup(group)">
+                <pk-icon name="pencil" [size]="14" />
+              </button>
+              <button type="button" class="btn btn-sm btn-danger-ghost" title="Delete Group"
+                (click)="confirmDeleteGroup(group)">
+                <pk-icon name="x-circle" [size]="14" />
+              </button>
+            </div>
+          </div>
+
+          <div class="sc-group-body" [class.sc-group-body--collapsed]="collapsedGroups().has(group.groupid)">
+            @if (group.agents.length === 0) {
+              <div class="sc-no-agents">No agents in this group.</div>
+            } @else {
+              <table class="sc-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Detail</th>
+                    <th>URL</th>
+                    <th>Status</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (agent of group.agents; track agent.agentid) {
+                    <tr [class.row-disabled]="agent.isactive === 0">
+                      <td class="td-name">{{ agent.name }}</td>
+                      <td class="td-detail">{{ agent.detail || '—' }}</td>
+                      <td class="td-url">
+                        <a [href]="agent.url" target="_blank" rel="noopener" class="url-link">
+                          {{ agent.url }}
+                        </a>
+                      </td>
+                      <td class="td-status">
+                        <button type="button"
+                          class="badge-toggle"
+                          [class.badge-active]="agent.isactive === 1"
+                          [class.badge-inactive]="agent.isactive === 0"
+                          [title]="agent.isactive ? 'Click to disable' : 'Click to enable'"
+                          (click)="toggleAgent(agent, group.groupid)">
+                          {{ agent.isactive ? 'Active' : 'Inactive' }}
+                        </button>
+                      </td>
+                      <td class="td-actions">
+                        <button type="button" class="btn btn-xs btn-ghost" title="Edit"
+                          (click)="openEditAgent(agent)">
+                          <pk-icon name="pencil" [size]="13" />
+                        </button>
+                        <button type="button" class="btn btn-xs btn-danger-ghost" title="Delete"
+                          (click)="confirmDeleteAgent(agent)">
+                          <pk-icon name="x-circle" [size]="13" />
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- ── Group Modal ─────────────────────────────────────────────────────────── -->
+<pk-modal
+  [title]="editingGroupId() !== null ? 'Edit Group' : 'Add Group'"
+  [isOpen]="groupModalOpen()"
+  size="sm"
+  (closed)="groupModalOpen.set(false)">
+
+  <div class="form-body">
+    <div class="form-field">
+      <label class="form-label">Group Name <span class="required">*</span></label>
+      <input
+        type="text"
+        class="form-input"
+        placeholder="e.g. Production"
+        [value]="groupForm().group"
+        (input)="updateGroupForm({ group: $any($event.target).value })" />
+    </div>
+    <div class="form-field">
+      <label class="form-label">Detail</label>
+      <input
+        type="text"
+        class="form-input"
+        placeholder="Group description"
+        [value]="groupForm().detail"
+        (input)="updateGroupForm({ detail: $any($event.target).value })" />
+    </div>
+  </div>
+
+  <div class="modal-footer" pk-modal-footer>
+    <button type="button" class="btn btn-ghost" (click)="groupModalOpen.set(false)">Cancel</button>
+    <button type="button" class="btn btn-primary" [disabled]="saving() || !groupForm().group.trim()"
+      (click)="saveGroup()">
+      @if (saving()) { <span class="spinner spinner-sm"></span> }
+      Save
+    </button>
+  </div>
+</pk-modal>
+
+<!-- ── Agent Modal ─────────────────────────────────────────────────────────── -->
+<pk-modal
+  [title]="editingAgentId() !== null ? 'Edit Agent' : 'Add Agent'"
+  [isOpen]="agentModalOpen()"
+  size="md"
+  (closed)="agentModalOpen.set(false)">
+
+  <div class="form-body">
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Agent Name <span class="required">*</span></label>
+        <input
+          type="text"
+          class="form-input"
+          placeholder="e.g. Web, API-1"
+          [value]="agentForm().name"
+          (input)="updateAgentForm({ name: $any($event.target).value })" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">Group</label>
+        <select class="form-input"
+          [value]="agentForm().groupid"
+          (change)="updateAgentForm({ groupid: +$any($event.target).value })">
+          @for (g of groups(); track g.groupid) {
+            <option [value]="g.groupid">{{ g.group }}</option>
+          }
+        </select>
+      </div>
+    </div>
+    <div class="form-field">
+      <label class="form-label">URL <span class="required">*</span></label>
+      <input
+        type="url"
+        class="form-input"
+        placeholder="https://api.example.com/agent"
+        [value]="agentForm().url"
+        (input)="updateAgentForm({ url: $any($event.target).value })" />
+    </div>
+    <div class="form-field">
+      <label class="form-label">Detail</label>
+      <input
+        type="text"
+        class="form-input"
+        placeholder="Description this agent (optional)"
+        [value]="agentForm().detail"
+        (input)="updateAgentForm({ detail: $any($event.target).value })" />
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Server Name</label>
+        <input
+          type="text"
+          class="form-input"
+          placeholder="From agent API config"
+          [value]="agentForm().server_name"
+          (input)="updateAgentForm({ server_name: $any($event.target).value })" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">Server Key</label>
+        <div class="input-secret-wrap">
+          <input
+            [type]="showServerKey() ? 'text' : 'password'"
+            class="form-input input-secret"
+            placeholder="From agent API config"
+            autocomplete="new-password"
+            [value]="agentForm().server_key"
+            (input)="updateAgentForm({ server_key: $any($event.target).value })" />
+          <button type="button" class="btn-show-key" (click)="showServerKey.update(v => !v)"
+            [title]="showServerKey() ? 'Hide' : 'Show'">
+            @if (showServerKey()) {
+              <pk-icon name="eye-off" [size]="15" />
+            } @else {
+              <pk-icon name="eye" [size]="15" />
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="form-field form-field--inline">
+      <label class="form-label">Active</label>
+      <label class="toggle-switch">
+        <input type="checkbox"
+          [checked]="agentForm().isactive === 1"
+          (change)="updateAgentForm({ isactive: $any($event.target).checked ? 1 : 0 })" />
+        <span class="toggle-track"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="modal-footer" pk-modal-footer>
+    <button type="button" class="btn btn-ghost" (click)="agentModalOpen.set(false)">Cancel</button>
+    <button type="button" class="btn btn-primary"
+      [disabled]="saving() || !agentForm().name.trim() || !agentForm().url.trim()"
+      (click)="saveAgent()">
+      @if (saving()) { <span class="spinner spinner-sm"></span> }
+      Save
+    </button>
+  </div>
+</pk-modal>
+
+<!-- ── Delete Confirm Modal ────────────────────────────────────────────────── -->
+<pk-modal
+  title="Confirm Delete"
+  [isOpen]="deleteModalOpen()"
+  size="sm"
+  (closed)="deleteModalOpen.set(false)">
+
+  <div class="delete-body">
+    <pk-icon name="alert-circle" [size]="36" class="delete-icon" />
+    <p>
+      Delete <strong>{{ deleteTarget()?.label }}</strong>?
+      @if (deleteTarget()?.type === 'group') {
+        <br /><span class="delete-warn">All agents in this group will also be deleted.</span>
+      }
+    </p>
+  </div>
+
+  <div class="modal-footer" pk-modal-footer>
+    <button type="button" class="btn btn-ghost" (click)="deleteModalOpen.set(false)">Cancel</button>
+    <button type="button" class="btn btn-danger" [disabled]="saving()" (click)="confirmDelete()">
+      @if (saving()) { <span class="spinner spinner-sm"></span> }
+      Delete
+    </button>
+  </div>
+</pk-modal>

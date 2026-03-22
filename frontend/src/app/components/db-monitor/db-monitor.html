@@ -1,0 +1,191 @@
+<main class="main-content">
+  @if (loading()) {
+  <div class="loading-state" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Connecting to servers…</p>
+  </div>
+  }
+
+  <div class="servers-list">
+    @for (server of servers(); track server.agentid) {
+    @if (!isDisabled(server.response)) {
+    <section class="server-section" [attr.aria-label]="'Database servers on ' + server.key">
+      <header class="server-heading">
+        <span class="server-heading-name">{{ server.group || '' }}: {{ server.key }}</span>
+        <span class="server-heading-url">{{ server.agentid }} {{ server.baseUrl }}</span>
+      </header>
+
+      @if (server.fetchError) {
+      <div class="state-card state-card--offline" role="alert">
+        <span class="state-icon" aria-hidden="true">⚠</span>
+        <p>Unable to reach server</p>
+        <code>{{ server.baseUrl }}/database/metrics</code>
+      </div>
+      } @else if (server.response === null) {
+      <div class="state-card" role="status" aria-live="polite">
+        <div class="spinner sm" aria-hidden="true"></div>
+        <p>Connecting…</p>
+      </div>
+      } @else if (isDbArray(server.response)) {
+      @if (server.response.length === 0) {
+      <div class="state-card" role="status">
+        <p>No databases configured</p>
+      </div>
+      } @else {
+      <div class="db-grid">
+        @for (db of server.response; track db.host + ':' + db.port + ':' + db.id) {
+        <article class="db-card" [class.db-card--ok]="db.status === 'ok'" [class.db-card--error]="db.status === 'error'"
+          [attr.aria-label]="db.id + ' (' + db.vendor + ')'">
+          <div class="db-card-header">
+            <div class="db-card-title-group">
+              <h3 class="db-card-name">{{ db.id }}</h3>
+              <span class="db-card-conn">{{ server.key }}: {{ db.vendor }}</span>
+            </div>
+            <div class="db-card-badges">
+              <span [class]="'vendor-badge vendor-badge--' + db.vendor">{{ db.vendor }}</span>
+              <span class="status-badge" [class.status-badge--ok]="db.status === 'ok'"
+                [class.status-badge--error]="db.status === 'error'">
+                {{ db.status === 'ok' ? 'On' : db.status }}
+              </span>
+              <button class="db-card-sql-btn" type="button" [attr.aria-label]="'View active queries for ' + db.id"
+                (click)="openDbModal(server.key, server.agentid, db)">
+                🔎 SQL
+              </button>
+            </div>
+          </div>
+
+          @if (isOkDb(db)) {
+          <p class="db-version">
+            v{{ db?.metrics?.version || 'N/A' }} &nbsp;·&nbsp; up
+            {{ formatDbUptime(db.metrics?.status?.['Uptime']) }}
+          </p>
+          <div class="spark-list">
+            @for (metric of trackedMetrics; track metric) {
+            @if (metric !== 'Max_connections') {
+            <div class="spark-row">
+              <div class="spark-info">
+                <span class="spark-label">{{ metric }}</span>
+                <span class="spark-value" [style.color]="metricColor[metric]">
+                  {{ formatMetricValue(currentValue(server.key, db.id, metric)) }}
+                </span>
+              </div>
+              <div echarts [options]="sparklineOption(server.key, db.id, metric)" class="spark-chart"
+                aria-hidden="true">
+              </div>
+            </div>
+            }
+            }
+          </div>
+          } @else {
+          <div class="db-error-body" role="alert">
+            <p class="db-error-msg">{{ dbError(db) }}</p>
+          </div>
+          }
+
+        </article>
+        }
+      </div>
+      }
+      }
+    </section>
+    }
+    }
+  </div>
+</main>
+
+<pk-modal [title]="modalTitle()" [isOpen]="modalOpen()" size="full" (closed)="closeModal()">
+  <div class="sql-chart-section">
+    <div class="sql-chart-header">
+      <span class="sql-chart-label" style="color:#4ade80">Connection</span>
+      <span class="sql-chart-value" style="color:#4ade80">
+        {{ formatMetricValue(currentValue(sqlServerKey(), sqlDbId(), 'Threads_connected')) }}
+      </span>
+      @if (currentValue(sqlServerKey(), sqlDbId(), 'Max_connections') > 0) {
+      <span class="sql-chart-max" [style.color]="metricColor['Max_connections']">
+        / {{ currentValue(sqlServerKey(), sqlDbId(), 'Max_connections') | number }} max
+        ({{ currentValue(sqlServerKey(), sqlDbId(), 'Threads_connected')*100/currentValue(sqlServerKey(), sqlDbId(),
+        'Max_connections') | number: '.2-2' }}%)
+      </span>
+      }
+    </div>
+    <div echarts id="connections-chart" [options]="modalChartOption(sqlServerKey(), sqlDbId())" class="sql-modal-chart"
+      aria-hidden="true"></div>
+  </div>
+  @if (sqlQueries().length === 0) {
+  <div class="sql-state">
+    <p>No active queries</p>
+  </div>
+  } @else {
+  <div class="sql-table-wrap">
+    <table class="sql-table">
+      <thead class="sticky-header">
+        <tr>
+          <th scope="col" class="sortable" (click)="sortQueries('id')">
+            # @if (sortColumn() === 'id') {<span class="sort-indicator">{{ sortDirection() === 'asc' ? '↑' : '↓'
+              }}</span>}
+          </th>
+          <th scope="col" class="sortable" (click)="sortQueries('user')">
+            User @if (sortColumn() === 'user') {<span class="sort-indicator">{{ sortDirection() === 'asc' ? '↑' : '↓'
+              }}</span>}
+          </th>
+          <th scope="col" class="sortable" (click)="sortQueries('db')">
+            DB @if (sortColumn() === 'db') {<span class="sort-indicator">{{ sortDirection() === 'asc' ? '↑' : '↓'
+              }}</span>}
+          </th>
+          <th scope="col" class="sortable" (click)="sortQueries('command')">
+            Cmd @if (sortColumn() === 'command') {<span class="sort-indicator">{{ sortDirection() === 'asc' ? '↑' : '↓'
+              }}</span>}
+          </th>
+          <th scope="col" class="sortable" (click)="sortQueries('time_sec')">
+            Time @if (sortColumn() === 'time_sec') {<span class="sort-indicator">{{ sortDirection() === 'asc' ? '↑' :
+              '↓' }}</span>}
+          </th>
+          <th scope="col" class="sortable" (click)="sortQueries('state')">
+            State @if (sortColumn() === 'state') {<span class="sort-indicator">{{ sortDirection() === 'asc' ? '↑' : '↓'
+              }}</span>}
+          </th>
+          <th scope="col">Query</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (q of sqlQueries(); track q.id) {
+        <tr>
+          <td>{{ q.id }}</td>
+          <td>{{ q.user }}</td>
+          <td>{{ q.db }}</td>
+          <td>{{ q.command }}</td>
+          <td [class.sql-time--slow]="q.time_sec >= 2">{{ q.time_sec }}s</td>
+          <td>{{ q.state }}</td>
+          <td class="sql-query-cell" [pkTooltip]="q.query">{{ q.query }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  }
+  <div pk-modal-footer class="sql-footer">
+    <div class="sql-auto-reload">
+      <label class="sql-auto-reload-label" for="sql-auto-reload-select">Auto reload</label>
+      <select id="sql-auto-reload-select" class="sql-auto-reload-select" #autoReloadSelect [value]="sqlAutoReload()"
+        (change)="setAutoReload(+autoReloadSelect.value)">
+        @for (sec of autoReloadOptions; track sec) {
+        <option [value]="sec" [selected]="sec === sqlAutoReload()">{{ sec === 0 ? 'Off' : sec + ' sec.' }}</option>
+        }
+      </select>
+      <label class="sql-rows-count">{{ sqlQueries().length || 0 | number }} Query rows</label>
+    </div>
+    @if (sqlAutoReload() === 0) {
+    <button type="button" class="sql-reload-btn" [disabled]="sqlLoading()" (click)="reloadSql()">
+      @if (sqlLoading()) {
+      <span class="pk-spinner pk-spinner-warning pk-spinner-xs pk-spinner-inline"></span>
+      } @else {
+      ↺ Reload
+      }
+    </button>
+    } @else {
+    @if (sqlLoading()) {
+    <span class="pk-spinner pk-spinner-warning pk-spinner-xs pk-spinner-inline"></span>
+    }
+    }
+  </div>
+</pk-modal>

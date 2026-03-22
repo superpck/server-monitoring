@@ -1,0 +1,131 @@
+<main class="nginx-monitor">
+  @if (statusLoading() && !hasData()) {
+  <div class="loading-state" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Loading Nginx monitoring data...</p>
+  </div>
+  } @else if (statusDisabled() && logsDisabled()) {
+  <div class="disabled-state">
+    <pk-icon name="x-circle" [size]="48" [strokeWidth]="1.5" />
+    <h3>Nginx Monitoring Disabled</h3>
+    <p>Nginx monitoring is not enabled on this server</p>
+  </div>
+  } @else {
+  <!-- Nginx Status Section -->
+  @if (!statusDisabled()) {
+  <section class="status-section">
+    <div class="section-header">
+      <h3 class="section-subtitle">Nginx Status</h3>
+      @if (nginxStatusInfo()) {
+      <button 
+        type="button" 
+        class="raw-toggle-btn"
+        (click)="toggleRawStatus()"
+        [attr.aria-label]="showRawStatus() ? 'Hide raw status' : 'Show raw status'"
+      >
+        {{ showRawStatus() ? 'Hide Raw' : 'Show Raw' }}
+      </button>
+      }
+    </div>
+    
+    @if (statusError() && !nginxStatusInfo()) {
+    <div class="error-message">
+      <pk-icon name="alert-circle" />
+      {{ statusError() }}
+    </div>
+    } @else if (nginxStatusInfo(); as info) {
+    
+    <!-- Key Metrics -->
+    <div class="status-grid">
+      <div class="stat-card">
+        <div class="stat-label">Status</div>
+        <div class="stat-value">
+          <span class="status-badge" [ngClass]="getStatusBadgeClass(info.active)">
+            {{ info.active || 'unknown' }}
+          </span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Main PID</div>
+        <div class="stat-value stat-value--monospace">{{ info.mainPid || 'N/A' }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Workers</div>
+        <div class="stat-value stat-value--primary">{{ info.workers }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Memory</div>
+        <div class="stat-value">{{ info.memory || 'N/A' }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">CPU Time</div>
+        <div class="stat-value">{{ info.cpu || 'N/A' }}</div>
+      </div>
+      <div class="stat-card stat-card--wide">
+        <div class="stat-label">Running Since</div>
+        <div class="stat-value stat-value--small">{{ info.since || 'N/A' }}</div>
+      </div>
+    </div>
+
+    <!-- Raw Status Output (collapsible) -->
+    @if (showRawStatus() && nginxStatusRaw()) {
+    <div class="raw-status-container">
+      <pre class="raw-status-text">{{ nginxStatusRaw() }}</pre>
+    </div>
+    }
+    
+    }
+  </section>
+  }
+
+  <!-- Nginx Logs Section -->
+  @if (!logsDisabled()) {
+  <section class="logs-section">
+    <div class="logs-header">
+      <h3 class="section-subtitle">Nginx Error Logs</h3>
+      <span class="logs-count">{{ nginxLogs().length }} entries</span>
+    </div>
+
+    @if (logsError() && nginxLogs().length === 0) {
+    <div class="error-message">
+      <pk-icon name="alert-circle" />
+      {{ logsError() }}
+    </div>
+    } @else if (nginxLogs().length === 0) {
+    <div class="empty-logs">
+      <p>No error logs found</p>
+    </div>
+    } @else {
+    <div class="logs-container">
+      <table class="logs-table">
+        <thead class="sticky-header">
+          <tr>
+            <th>Time</th>
+            <th>Level</th>
+            <th>PID</th>
+            <th>Message</th>
+            <th>Client</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (log of nginxLogs(); track $index) {
+          <tr>
+            <td class="cell-time">{{ log.datetime }}</td>
+            <td>
+              <span class="log-level-badge" [ngClass]="getLogLevelClass(log.level)">
+                {{ log.level }}
+              </span>
+            </td>
+            <td class="cell-pid">{{ log.pid }}</td>
+            <td class="cell-message">{{ log.message }}</td>
+            <td class="cell-client">{{ log.client || '-' }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
+  </section>
+  }
+  }
+</main>

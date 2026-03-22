@@ -1,0 +1,125 @@
+<div class="server-management-container" [class.sidebar-hidden]="!sidebarVisible()">
+  <!-- Backdrop for mobile -->
+  <div class="sidebar-backdrop" [class.backdrop-visible]="sidebarVisible()" (click)="toggleSidebar()"
+    aria-hidden="true"></div>
+
+  <!-- Toggle Sidebar Button -->
+  <button type="button" class="sidebar-toggle-btn" (click)="toggleSidebar()"
+    [attr.aria-label]="sidebarVisible() ? 'Hide server list' : 'Show server list'"
+    [attr.title]="sidebarVisible() ? 'Hide server list' : 'Show server list'">
+    @if (sidebarVisible()) {
+    <pk-icon name="sidebar-open" />
+    } @else {
+    <pk-icon name="sidebar-close" />
+    }
+  </button>
+
+  <!-- Left Sidebar: Server List -->
+  <aside class="server-list-sidebar" [class.sidebar-collapsed]="!sidebarVisible()">
+    <div class="sidebar-header">
+      <h2 style="margin-left: 10px;">Servers</h2>
+      <span class="server-count">{{ totalAgents() }}</span>
+    </div>
+    <div class="server-list">
+      @for (group of groups(); track group.group) {
+      <div class="server-group">
+        <div class="server-group-label">
+          <span>{{ group.group }}</span>
+          <span class="server-count">{{ group.agents.length }}</span>
+        </div>
+        @if (group.agents.length > 0) {
+        @for (server of group.agents; track server.name) {
+        <button type="button" class="server-item"
+          [class.server-item--active]="selectedServer()?.agentid === server.agentid" (click)="selectServer(server)"
+          [attr.aria-label]="'Select server ' + server.name"
+          [attr.aria-pressed]="selectedServer()?.agentid === server.agentid">
+          <div class="server-item-icon">
+            <pk-icon name="server" />
+          </div>
+          <div class="server-item-content">
+            <div class="server-item-name">{{ server.name }}</div>
+          </div>
+        </button>
+        }
+        }
+      </div>
+      }
+    </div>
+  </aside>
+
+  <!-- Right Content: All Monitors -->
+  <main class="monitoring-content">
+    @if (!hasSelectedServer()) {
+    <div class="empty-state">
+      <pk-icon name="server" [size]="48" [strokeWidth]="1.5" />
+      <h3>Select a Server</h3>
+      <p>Choose a server from the list to view monitoring details</p>
+    </div>
+    } @else {
+    <div class="monitoring-header">
+      <h2>{{ selectedServer()?.name }}</h2>
+      <span class="monitoring-url">{{ selectedServer()?.url }}</span>
+    </div>
+
+    <div class="monitoring-sections">
+      <!-- System Overview Section -->
+      <section class="monitor-section">
+        <h3 class="section-title">
+          <pk-icon name="info" />
+          System Overview
+        </h3>
+        <div class="monitor-section-selector">
+          <app-overview-monitor />
+        </div>
+      </section>
+
+      <!-- Server Monitor Section -->
+      <section class="monitor-section">
+        <h3 class="section-title">
+          <pk-icon name="activity" />
+          Server Monitor
+        </h3>
+        <div class="monitor-section-selector">
+          <app-server-monitor />
+        </div>
+      </section>
+
+      <!-- Database Monitor Section -->
+      <section class="monitor-section">
+        <h3 class="section-title">
+          <pk-icon name="database" />
+          Database Monitor
+        </h3>
+        <app-db-monitor />
+      </section>
+
+      <!-- PM2 Monitor Section -->
+      <section class="monitor-section">
+        <h3 class="section-title">
+          <pk-icon name="cpu" />
+          PM2 Monitor
+        </h3>
+        <app-pm2-monitor />
+      </section>
+
+      <!-- Nginx Monitor Section -->
+      <section class="monitor-section">
+        <h3 class="section-title">
+          <pk-icon name="home" />
+          Nginx Monitor
+        </h3>
+        <app-nginx-monitor />
+      </section>
+
+      <!-- Secure Log Section -->
+      <section class="monitor-section">
+        <h3 class="section-title">
+          <pk-icon name="shield" />
+          Secure Log
+        </h3>
+        <app-secure-monitor />
+      </section>
+    </div>
+    }
+  </main>
+</div>

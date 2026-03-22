@@ -1,0 +1,185 @@
+.overview-monitor {
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  width: 100%;
+  max-height: 75vh;
+  overflow: auto;
+  min-height: 200px;
+}
+
+/* ── States ─────────────────────────────────────────────────────────────────── */
+.ov-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2.5rem 1rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.ov-state--disabled h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.ov-state--disabled code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.78rem;
+  background: rgba(99, 102, 241, 0.12);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  color: #a5b4fc;
+}
+
+.ov-state--error { color: #f87171; }
+
+/* ── Toolbar ─────────────────────────────────────────────────────────────────── */
+.ov-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-surface-3);
+}
+
+.ov-collected {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  font-family: ui-monospace, monospace;
+}
+
+.ov-reload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.9rem;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  border-radius: 6px;
+  background: rgba(99, 102, 241, 0.12);
+  color: #a5b4fc;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.ov-reload-btn:hover:not(:disabled) { background: rgba(99, 102, 241, 0.25); color: #e0e7ff; }
+.ov-reload-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Sections Grid ───────────────────────────────────────────────────────────── */
+.ov-sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  min-width: 0;
+}
+
+/* ── Cards ───────────────────────────────────────────────────────────────────── */
+.ov-card {
+  background: var(--bg-surface-2, var(--bg-surface));
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.ov-card--full  { grid-column: 1 / -1; }
+.ov-card--half  { grid-column: span 1; }
+
+.ov-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: var(--bg-surface-3);
+  border-bottom: 1px solid var(--border-color);
+  letter-spacing: 0.02em;
+}
+
+.ov-card-title--success { color: #4ade80; }
+.ov-card-title--error   { color: #f87171; }
+
+.ov-badge {
+  margin-left: auto;
+  padding: 0.1rem 0.5rem;
+  border-radius: 12px;
+  background: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+/* ── Definition List ─────────────────────────────────────────────────────────── */
+.ov-dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.3rem 1rem;
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  font-size: 0.78rem;
+}
+
+.ov-dl dt {
+  color: var(--color-text-muted);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.ov-dl dd {
+  margin: 0;
+  color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.ov-mono { font-family: ui-monospace, monospace; font-size: 0.7rem; }
+
+/* ── Pre / Code Blocks ───────────────────────────────────────────────────────── */
+.ov-pre {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-size: 0.7rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: var(--color-text-secondary);
+  max-height: 300px;
+  overflow: auto;
+}
+
+.ov-pre--sm       { max-height: 260px; font-size: 0.68rem; }
+.ov-pre--nowrap   { white-space: pre; word-break: normal; overflow-x: auto; }
+.ov-pre--error    { color: #fca5a5; }
+
+/* ── Empty / No Data ─────────────────────────────────────────────────────────── */
+.ov-empty {
+  margin: 0;
+  padding: 1rem 0.9rem;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.ov-empty--success { color: #4ade80; font-style: normal; }
+
+/* ── Spinners ────────────────────────────────────────────────────────────────── */
+.spinner {
+  width: 32px; height: 32px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--primary-color, #6366f1);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.spinner.xs { width: 12px; height: 12px; border-width: 2px; }
+
+@keyframes spin { to { transform: rotate(360deg); } }

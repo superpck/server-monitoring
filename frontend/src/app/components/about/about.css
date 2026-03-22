@@ -1,0 +1,269 @@
+:host {
+  display: block;
+  min-height: calc(100dvh - 56px);
+  background: var(--bg-page);
+  color: var(--color-text);
+}
+
+.about-page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ── Hero ──────────────────────────────────────────────────────────────────── */
+.about-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 3rem 2rem 2.5rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  overflow: hidden;
+  gap: 0.5rem;
+}
+
+.about-hero-glow {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 360px;
+  height: 200px;
+  background: radial-gradient(ellipse, rgba(99, 102, 241, 0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.about-pulse-ring {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+}
+
+.about-pulse-ring::before,
+.about-pulse-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(34, 197, 94, 0.15);
+  animation: ring-pulse 2.5s ease-out infinite;
+}
+
+.about-pulse-ring::after { animation-delay: 1.25s; }
+
+.about-pulse-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.6);
+}
+
+@keyframes ring-pulse {
+  0%   { transform: scale(0.6); opacity: 0.8; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+.about-title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #e0e7ff 0%, #a5b4fc 40%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.about-subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  letter-spacing: 0.01em;
+}
+
+.about-version-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.about-version-badge {
+  font-family: ui-monospace, monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  letter-spacing: 0.03em;
+}
+
+.about-subver {
+  font-family: ui-monospace, monospace;
+  font-size: 0.7rem;
+  color: var(--color-text-subtle);
+}
+
+/* ── Cards ─────────────────────────────────────────────────────────────────── */
+.about-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 1.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  transition: border-color 0.2s;
+}
+
+.about-card:hover { border-color: rgba(99, 102, 241, 0.3); }
+
+.about-card-title {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+}
+
+/* ── Workflow ───────────────────────────────────────────────────────────────── */
+.about-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  row-gap: 1rem;
+}
+
+.about-flow-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 1rem 1.25rem;
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  min-width: 120px;
+  transition: border-color 0.2s, transform 0.15s;
+}
+
+.about-flow-node:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
+}
+
+.about-flow-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-flow-icon--blue   { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+.about-flow-icon--purple { background: rgba(167, 139, 250, 0.15); color: #a78bfa; }
+.about-flow-icon--green  { background: rgba(74, 222, 128, 0.15); color: #4ade80; }
+
+.about-flow-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.about-flow-sub {
+  font-size: 0.68rem;
+  color: var(--color-text-muted);
+}
+
+.about-flow-connector {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-subtle);
+  padding: 0 0.25rem;
+  flex-shrink: 0;
+}
+
+.about-flow-line {
+  width: 20px;
+  height: 1px;
+  background: var(--border-color);
+}
+
+/* ── Tech Grid ──────────────────────────────────────────────────────────────── */
+.about-tech-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.about-tech-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.about-tech-item:hover {
+  background: var(--bg-surface-3);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.about-tech-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.about-tech-dot--red    { background: #f87171; box-shadow: 0 0 6px rgba(248,113,113,0.5); }
+.about-tech-dot--blue   { background: #38bdf8; box-shadow: 0 0 6px rgba(56,189,248,0.5); }
+.about-tech-dot--yellow { background: #fbbf24; box-shadow: 0 0 6px rgba(251,191,36,0.5); }
+.about-tech-dot--purple { background: #a78bfa; box-shadow: 0 0 6px rgba(167,139,250,0.5); }
+.about-tech-dot--green  { background: #4ade80; box-shadow: 0 0 6px rgba(74,222,128,0.5); }
+.about-tech-dot--cyan   { background: #67e8f9; box-shadow: 0 0 6px rgba(103,232,249,0.5); }
+
+.about-tech-name {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.about-tech-desc {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  margin-top: 0.1rem;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .about-page { padding: 1.5rem 1rem 3rem; }
+  .about-title { font-size: 1.6rem; }
+  .about-flow { flex-direction: column; }
+  .about-flow-connector { transform: rotate(90deg); }
+  .about-tech-grid { grid-template-columns: 1fr; }
+}
+

@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="Server Monitor Logo">
+  <defs>
+    <linearGradient id="bg-grad" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#1e3a8a"/>
+      <stop offset="55%" stop-color="#1d4ed8"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+    <linearGradient id="pulse-grad" x1="0" y1="0.5" x2="1" y2="0.5" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+    <linearGradient id="bay-grad" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.18)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0.06)"/>
+    </linearGradient>
+    <filter id="glow-green" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-pulse" x="-20%" y="-60%" width="140%" height="220%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background rounded square -->
+  <rect width="64" height="64" rx="14" fill="url(#bg-grad)"/>
+
+  <!-- Top sheen -->
+  <rect x="0" y="0" width="64" height="28" rx="14" fill="rgba(255,255,255,0.04)"/>
+
+  <!-- Inner border glow -->
+  <rect x="1" y="1" width="62" height="62" rx="13" stroke="rgba(255,255,255,0.12)" stroke-width="1" fill="none"/>
+
+  <!-- Server chassis -->
+  <rect x="9" y="7" width="46" height="33" rx="3.5"
+        fill="rgba(15,23,42,0.35)" stroke="rgba(148,163,184,0.22)" stroke-width="1"/>
+
+  <!-- Bay 1 -->
+  <rect x="13" y="11" width="30" height="7" rx="2" fill="url(#bay-grad)"/>
+  <rect x="13" y="11" width="30" height="7" rx="2" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+  <!-- bay 1 inner slots -->
+  <rect x="15" y="13.5" width="8" height="2" rx="0.75" fill="rgba(255,255,255,0.25)"/>
+  <rect x="25" y="13.5" width="5" height="2" rx="0.75" fill="rgba(255,255,255,0.15)"/>
+
+  <!-- Bay 2 -->
+  <rect x="13" y="21" width="30" height="7" rx="2" fill="url(#bay-grad)"/>
+  <rect x="13" y="21" width="30" height="7" rx="2" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+  <rect x="15" y="23.5" width="8" height="2" rx="0.75" fill="rgba(255,255,255,0.25)"/>
+  <rect x="25" y="23.5" width="5" height="2" rx="0.75" fill="rgba(255,255,255,0.15)"/>
+
+  <!-- Bay 3 -->
+  <rect x="13" y="31" width="30" height="7" rx="2" fill="url(#bay-grad)"/>
+  <rect x="13" y="31" width="30" height="7" rx="2" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+  <rect x="15" y="33.5" width="8" height="2" rx="0.75" fill="rgba(255,255,255,0.25)"/>
+  <rect x="25" y="33.5" width="5" height="2" rx="0.75" fill="rgba(255,255,255,0.15)"/>
+
+  <!-- Status dots -->
+  <circle cx="47.5" cy="14.5" r="3" fill="#4ade80" filter="url(#glow-green)"/>
+  <circle cx="47.5" cy="24.5" r="3" fill="#4ade80" filter="url(#glow-green)"/>
+  <circle cx="47.5" cy="34.5" r="3" fill="#fbbf24"/>
+
+  <!-- Pulse / heartbeat line -->
+  <path d="M5 52.5 L14 52.5 L18 46 L22 59 L26 49 L30 54.5 L34 52.5 L59 52.5"
+        stroke="url(#pulse-grad)" stroke-width="2.5"
+        stroke-linecap="round" stroke-linejoin="round"
+        filter="url(#glow-pulse)"/>
+</svg>

@@ -1,0 +1,70 @@
+<main class="login-page">
+  <!-- ambient glow blobs -->
+  <div class="blob blob-1" aria-hidden="true"></div>
+  <div class="blob blob-2" aria-hidden="true"></div>
+
+  <section class="login-card" aria-labelledby="login-title">
+    <!-- brand header -->
+    <div class="brand">
+      <div class="brand-icon">
+        <img src="logo.svg" width="28" height="28" alt="Server Monitor" class="brand-logo" />
+      </div>
+      <div>
+        <div class="brand-name">Server Monitor</div>
+        <div class="brand-sub">API Gateway</div>
+      </div>
+    </div>
+
+    <h2 id="login-title" class="card-title">Welcome back</h2>
+    <p class="card-sub">Sign in to your admin account</p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <!-- username -->
+      <div class="field">
+        <label for="username">Username</label>
+        <div class="input-wrap">
+          <span class="input-icon">
+            <pk-icon name="user" [size]="16" [strokeWidth]="2" />
+          </span>
+          <input id="username" type="text" formControlName="username"
+                 autocomplete="username" placeholder="Input your username" />
+        </div>
+        @if (form.controls.username.invalid && form.controls.username.touched) {
+          <p class="field-error" role="alert">Username is required.</p>
+        }
+      </div>
+
+      <!-- password -->
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <span class="input-icon">
+            <pk-icon name="key" [size]="16" [strokeWidth]="2" />
+          </span>
+          <input id="password" type="password" formControlName="password"
+                 autocomplete="current-password" placeholder="••••••••" />
+        </div>
+        @if (form.controls.password.invalid && form.controls.password.touched) {
+          <p class="field-error" role="alert">Password is required.</p>
+        }
+      </div>
+
+      @if (errorMessage()) {
+        <div class="api-error" role="alert">
+          <pk-icon name="alert-circle" [size]="15" [strokeWidth]="2" />
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <button type="submit" [disabled]="loading()" class="btn-submit">
+        @if (loading()) {
+          <span class="spinner" aria-hidden="true"></span>
+          Signing in…
+        } @else {
+          <pk-icon name="sign-in" [size]="17" [strokeWidth]="2" />
+          Sign in
+        }
+      </button>
+    </form>
+  </section>
+</main>
