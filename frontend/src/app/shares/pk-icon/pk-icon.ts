@@ -25,6 +25,8 @@ const ICON_PATHS: Record<string, string> = {
   'chevron-right': `<polyline points="9 18 15 12 9 6"></polyline>`,
   'chevron-up': `<polyline points="18 15 12 9 6 15"></polyline>`,
   'chevron-left': `<polyline points="15 18 9 12 15 6"></polyline>`,
+  monitor: `<rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line>`,
+  zap: `<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>`,
 };
 
 @Component({
