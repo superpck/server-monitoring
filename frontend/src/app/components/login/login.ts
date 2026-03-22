@@ -41,7 +41,7 @@ export class Login {
     try {
       await this.loginService.login(username, password);
       this.auth.refresh();
-      this.router.navigateByUrl('/alive');
+      this.router.navigateByUrl('/about');
     } catch (err: any) {
       if (err instanceof HttpErrorResponse) {
         const msg = err.error?.message || err?.message || 'Login failed';
