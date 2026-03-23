@@ -8,6 +8,7 @@ interface GroupRow {
   groupid: number
   group: string
   detail: string
+  seq: number
 }
 
 interface AgentRow {
@@ -18,16 +19,17 @@ interface AgentRow {
   url: string
   server_name: string
   isactive: number
+  seq: number
 }
 
 // ── GET /servers — all groups with their agents (public) ─────────────────────
 router.get('/', (_req: Request, res: Response) => {
   const groups = db
-    .prepare<[], GroupRow>('SELECT groupid, group_name as "group", detail FROM server_group ORDER BY groupid')
+    .prepare<[], GroupRow>('SELECT groupid, group_name as "group", detail, seq FROM server_group ORDER BY seq, groupid')
     .all()
 
   const agents = db
-    .prepare<[], AgentRow>('SELECT agentid, groupid, name, detail, url, server_name, isactive FROM server_agent ORDER BY agentid')
+    .prepare<[], AgentRow>('SELECT agentid, groupid, name, detail, url, server_name, isactive, seq FROM server_agent ORDER BY seq, agentid')
     .all()
 
   const result = groups.map((g) => ({
@@ -40,21 +42,21 @@ router.get('/', (_req: Request, res: Response) => {
 
 // ── POST /servers/groups ──────────────────────────────────────────────────────
 router.post('/groups', auth, requireAdmin, (req: Request, res: Response) => {
-  const { group, detail = '' } = req.body as { group?: string; detail?: string }
+  const { group, detail = '', seq = 100 } = req.body as { group?: string; detail?: string; seq?: number }
   if (!group?.trim()) {
     res.status(400).json({ status: 400, error: 'Bad Request', message: 'group name is required' })
     return
   }
   const result = db
-    .prepare('INSERT INTO server_group (group_name, detail) VALUES (?, ?)')
-    .run(group.trim(), detail)
-  res.status(201).json({ status: 201, groupid: result.lastInsertRowid, group: group.trim(), detail, agents: [] })
+    .prepare('INSERT INTO server_group (group_name, detail, seq) VALUES (?, ?, ?)')
+    .run(group.trim(), detail, seq)
+  res.status(201).json({ status: 201, groupid: result.lastInsertRowid, group: group.trim(), detail, seq, agents: [] })
 })
 
 // ── PUT /servers/groups/:groupid ──────────────────────────────────────────────
 router.put('/groups/:groupid', auth, requireAdmin, (req: Request, res: Response) => {
   const groupid = Number(req.params['groupid'])
-  const { group, detail } = req.body as { group?: string; detail?: string }
+  const { group, detail, seq } = req.body as { group?: string; detail?: string; seq?: number }
 
   const existing = db.prepare('SELECT groupid FROM server_group WHERE groupid = ?').get(groupid)
   if (!existing) {
@@ -63,8 +65,8 @@ router.put('/groups/:groupid', auth, requireAdmin, (req: Request, res: Response)
   }
 
   db.prepare(
-    'UPDATE server_group SET group_name = COALESCE(?, group_name), detail = COALESCE(?, detail) WHERE groupid = ?'
-  ).run(group?.trim() ?? null, detail ?? null, groupid)
+    'UPDATE server_group SET group_name = COALESCE(?, group_name), detail = COALESCE(?, detail), seq = COALESCE(?, seq) WHERE groupid = ?'
+  ).run(group?.trim() ?? null, detail ?? null, seq ?? null, groupid)
 
   res.json({ status: 200, success: true })
 })
@@ -82,7 +84,7 @@ router.delete('/groups/:groupid', auth, requireAdmin, (req: Request, res: Respon
 
 // ── POST /servers/agents ──────────────────────────────────────────────────────
 router.post('/agents', auth, requireAdmin, (req: Request, res: Response) => {
-  const { groupid, name, detail = '', url, server_name = '', server_key = '', isactive = 1 } = req.body as {
+  const { groupid, name, detail = '', url, server_name = '', server_key = '', isactive = 1, seq = 100 } = req.body as {
     groupid?: number
     name?: string
     detail?: string
@@ -90,6 +92,7 @@ router.post('/agents', auth, requireAdmin, (req: Request, res: Response) => {
     server_name?: string
     server_key?: string
     isactive?: number
+    seq?: number
   }
 
   if (!groupid || !name?.trim() || !url?.trim()) {
@@ -104,8 +107,8 @@ router.post('/agents', auth, requireAdmin, (req: Request, res: Response) => {
   }
 
   const result = db
-    .prepare('INSERT INTO server_agent (groupid, name, detail, url, server_name, server_key, isactive) VALUES (?, ?, ?, ?, ?, ?, ?)')
-    .run(groupid, name.trim(), detail, url.trim(), server_name, server_key, isactive ? 1 : 0)
+    .prepare('INSERT INTO server_agent (groupid, name, detail, url, server_name, server_key, isactive, seq) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+    .run(groupid, name.trim(), detail, url.trim(), server_name, server_key, isactive ? 1 : 0, seq)
 
   res.status(201).json({
     agentid: result.lastInsertRowid,
@@ -115,13 +118,14 @@ router.post('/agents', auth, requireAdmin, (req: Request, res: Response) => {
     url: url.trim(),
     server_name,
     isactive: isactive ? 1 : 0,
+    seq,
   })
 })
 
 // ── PUT /servers/agents/:agentid ──────────────────────────────────────────────
 router.put('/agents/:agentid', auth, requireAdmin, (req: Request, res: Response) => {
   const agentid = Number(req.params['agentid'])
-  const { name, detail, url, server_name, server_key, groupid, isactive } = req.body as {
+  const { name, detail, url, server_name, server_key, groupid, isactive, seq } = req.body as {
     name?: string
     detail?: string
     url?: string
@@ -129,6 +133,7 @@ router.put('/agents/:agentid', auth, requireAdmin, (req: Request, res: Response)
     server_key?: string
     groupid?: number,
     isactive?: number
+    seq?: number
   }
 
   const existing = db.prepare('SELECT agentid FROM server_agent WHERE agentid = ?').get(agentid)
@@ -145,9 +150,10 @@ router.put('/agents/:agentid', auth, requireAdmin, (req: Request, res: Response)
         server_name = COALESCE(?, server_name),
         server_key  = COALESCE(?, server_key),
         groupid     = COALESCE(?, groupid),
-        isactive    = COALESCE(?, isactive)
+        isactive    = COALESCE(?, isactive),
+        seq         = COALESCE(?, seq)
     WHERE agentid = ?
-  `).run(name?.trim() ?? null, detail ?? null, url?.trim() ?? null, server_name ?? null, server_key?.trim() || null, groupid ?? null, isactive ?? null, agentid)
+  `).run(name?.trim() ?? null, detail ?? null, url?.trim() ?? null, server_name ?? null, server_key?.trim() || null, groupid ?? null, isactive ?? null, seq ?? null, agentid)
 
   res.json({ status: 200, success: true })
 })
