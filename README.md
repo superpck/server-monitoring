@@ -5,16 +5,6 @@ Consists of 3 parts: **Agent (`server-api`)**, **API Gateway (`api`)**, and **UI
 
 ---
 
-## Screenshots
-
-**Login**  
-![Login Screen](documents/login_screen.png)
-
-**About**  
-![About Screen](documents/about_screen.png)
-
----
-
 ## Architecture
 
 ```
@@ -187,4 +177,14 @@ cd frontend && npm start
 ```
 
 Then open [http://localhost:4204](http://localhost:4204), log in, and add your server groups & agents via **Server Config**.
+
+---
+
+## Screenshots
+
+**Login**  
+![Login Screen](documents/login_screen.png)
+
+**About**  
+![About Screen](documents/about_screen.png)
 
