@@ -70,6 +70,12 @@ export class ServerConfig implements OnInit {
   protected readonly deleteModalOpen = signal(false);
   protected deleteTarget = signal<{ type: 'group' | 'agent'; id: number; label: string } | null>(null);
 
+  // ── Drag-and-drop ────────────────────────────────────────────────────────
+  protected readonly dragGroupIdx = signal<number | null>(null);
+  protected readonly dragOverGroupIdx = signal<number | null>(null);
+  protected readonly dragAgentInfo = signal<{ groupid: number; idx: number } | null>(null);
+  protected readonly dragOverAgentInfo = signal<{ groupid: number; idx: number } | null>(null);
+
   ngOnInit(): void {
     this.loadAll();
   }
@@ -79,7 +85,7 @@ export class ServerConfig implements OnInit {
     try {
       this.groups.set(await this.svc.getAll());
     } catch {
-      this.toastr.error('โหลดข้อมูลไม่สำเร็จ');
+      this.toastr.error('Failed to load data');
     } finally {
       this.loading.set(false);
     }
@@ -113,15 +119,15 @@ export class ServerConfig implements OnInit {
         this.groups.update(gs =>
           gs.map(g => g.groupid === gid ? { ...g, ...form } : g)
         );
-        this.toastr.success('แก้ไข Group สำเร็จ');
+        this.toastr.success('Group updated');
       } else {
         const created = await this.svc.createGroup(form);
         this.groups.update(gs => [...gs, created]);
-        this.toastr.success('เพิ่ม Group สำเร็จ');
+        this.toastr.success('Group created');
       }
       this.groupModalOpen.set(false);
     } catch {
-      this.toastr.error('บันทึกไม่สำเร็จ');
+      this.toastr.error('Failed to save');
     } finally {
       this.saving.set(false);
     }
@@ -176,17 +182,17 @@ export class ServerConfig implements OnInit {
             agents: g.agents.map(a => a.agentid === aid ? { ...a, ...rest } : a),
           }))
         );
-        this.toastr.success('แก้ไข Agent สำเร็จ');
+        this.toastr.success('Agent updated');
       } else {
         const created = await this.svc.createAgent(form);
         this.groups.update(gs =>
           gs.map(g => g.groupid === form.groupid ? { ...g, agents: [...g.agents, created] } : g)
         );
-        this.toastr.success('เพิ่ม Agent สำเร็จ');
+        this.toastr.success('Agent created');
       }
       this.agentModalOpen.set(false);
     } catch {
-      this.toastr.error('บันทึกไม่สำเร็จ');
+      this.toastr.error('Failed to save');
     } finally {
       this.saving.set(false);
     }
@@ -207,7 +213,7 @@ export class ServerConfig implements OnInit {
         )
       );
     } catch {
-      this.toastr.error('เปลี่ยนสถานะไม่สำเร็จ');
+      this.toastr.error('Failed to update status');
     }
   }
 
@@ -220,20 +226,123 @@ export class ServerConfig implements OnInit {
       if (target.type === 'group') {
         await this.svc.deleteGroup(target.id);
         this.groups.update(gs => gs.filter(g => g.groupid !== target.id));
-        this.toastr.success('ลบ Group สำเร็จ');
+        this.toastr.success('Group deleted');
       } else {
         await this.svc.deleteAgent(target.id);
         this.groups.update(gs =>
           gs.map(g => ({ ...g, agents: g.agents.filter(a => a.agentid !== target.id) }))
         );
-        this.toastr.success('ลบ Agent สำเร็จ');
+        this.toastr.success('Agent deleted');
       }
       this.deleteModalOpen.set(false);
       this.deleteTarget.set(null);
     } catch {
-      this.toastr.error('ลบไม่สำเร็จ');
+      this.toastr.error('Failed to delete');
     } finally {
       this.saving.set(false);
+    }
+  }
+
+  // ── Drag-and-drop: Groups ─────────────────────────────────────────────────
+  protected onGroupDragStart(event: DragEvent, idx: number): void {
+    this.dragGroupIdx.set(idx);
+    event.dataTransfer!.effectAllowed = 'move';
+  }
+
+  protected onGroupDragOver(event: DragEvent, idx: number): void {
+    if (this.dragGroupIdx() === null) return;
+    event.preventDefault();
+    event.dataTransfer!.dropEffect = 'move';
+    this.dragOverGroupIdx.set(idx);
+  }
+
+  protected onGroupDrop(event: DragEvent, toIdx: number): void {
+    event.preventDefault();
+    const fromIdx = this.dragGroupIdx();
+    if (fromIdx === null || fromIdx === toIdx) {
+      this.dragGroupIdx.set(null);
+      this.dragOverGroupIdx.set(null);
+      return;
+    }
+    this.groups.update(gs => {
+      const arr = [...gs];
+      const [moved] = arr.splice(fromIdx, 1);
+      arr.splice(toIdx, 0, moved);
+      return arr;
+    });
+    this.dragGroupIdx.set(null);
+    this.dragOverGroupIdx.set(null);
+    this.saveGroupOrder();
+  }
+
+  protected onGroupDragEnd(): void {
+    this.dragGroupIdx.set(null);
+    this.dragOverGroupIdx.set(null);
+  }
+
+  private async saveGroupOrder(): Promise<void> {
+    const updates = this.groups().map((g, i) => ({ groupid: g.groupid, seq: (i + 1) * 10 }));
+    try {
+      await this.svc.reorderGroups(updates);
+      this.groups.update(gs => gs.map((g, i) => ({ ...g, seq: (i + 1) * 10 })));
+      this.toastr.success('Group order saved');
+    } catch {
+      this.toastr.error('Failed to save order');
+    }
+  }
+
+  // ── Drag-and-drop: Agents ─────────────────────────────────────────────────
+  protected onAgentDragStart(event: DragEvent, groupid: number, idx: number): void {
+    this.dragAgentInfo.set({ groupid, idx });
+    event.dataTransfer!.effectAllowed = 'move';
+  }
+
+  protected onAgentDragOver(event: DragEvent, groupid: number, idx: number): void {
+    const drag = this.dragAgentInfo();
+    if (!drag || drag.groupid !== groupid) return;
+    event.preventDefault();
+    event.dataTransfer!.dropEffect = 'move';
+    this.dragOverAgentInfo.set({ groupid, idx });
+  }
+
+  protected onAgentDrop(event: DragEvent, groupid: number, toIdx: number): void {
+    event.preventDefault();
+    const drag = this.dragAgentInfo();
+    if (!drag || drag.groupid !== groupid || drag.idx === toIdx) {
+      this.dragAgentInfo.set(null);
+      this.dragOverAgentInfo.set(null);
+      return;
+    }
+    this.groups.update(gs => gs.map(g => {
+      if (g.groupid !== groupid) return g;
+      const agents = [...g.agents];
+      const [moved] = agents.splice(drag.idx, 1);
+      agents.splice(toIdx, 0, moved);
+      return { ...g, agents };
+    }));
+    this.dragAgentInfo.set(null);
+    this.dragOverAgentInfo.set(null);
+    this.saveAgentOrder(groupid);
+  }
+
+  protected onAgentDragEnd(): void {
+    this.dragAgentInfo.set(null);
+    this.dragOverAgentInfo.set(null);
+  }
+
+  private async saveAgentOrder(groupid: number): Promise<void> {
+    const g = this.groups().find(g => g.groupid === groupid);
+    if (!g) return;
+    const updates = g.agents.map((a, i) => ({ agentid: a.agentid, seq: (i + 1) * 10 }));
+    try {
+      await this.svc.reorderAgents(updates);
+      this.groups.update(gs => gs.map(g => {
+        if (g.groupid !== groupid) return g;
+        return { ...g, agents: g.agents.map((a, i) => ({ ...a, seq: (i + 1) * 10 })) };
+      }));
+      this.toastr.success('Agent order saved');
+    } catch {
+      this.toastr.error('Failed to save order');
     }
   }
 }

@@ -12,6 +12,7 @@ export interface ServerAgent {
   server_name: string;
   server_key?: string;
   isactive: number;
+  seq?: number;
 }
 
 export interface ServerConfigGroup {
@@ -19,6 +20,7 @@ export interface ServerConfigGroup {
   group: string;
   detail: string;
   agents: ServerAgent[];
+  seq?: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -91,6 +93,26 @@ export class ServerConfigService {
         `${config.apiUrl}/servers/agents/${agentid}/toggle`,
         {},
         { headers: this.authHeaders }
+      )
+    );
+  }
+
+  async reorderGroups(items: Array<{ groupid: number; seq: number }>): Promise<void> {
+    await Promise.all(
+      items.map(({ groupid, seq }) =>
+        firstValueFrom(
+          this.http.put(`${config.apiUrl}/servers/groups/${groupid}`, { seq }, { headers: this.authHeaders })
+        )
+      )
+    );
+  }
+
+  async reorderAgents(items: Array<{ agentid: number; seq: number }>): Promise<void> {
+    await Promise.all(
+      items.map(({ agentid, seq }) =>
+        firstValueFrom(
+          this.http.put(`${config.apiUrl}/servers/agents/${agentid}`, { seq }, { headers: this.authHeaders })
+        )
       )
     );
   }

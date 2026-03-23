@@ -21,9 +21,18 @@
   } @else {
     <div class="sc-groups">
       @for (group of groups(); track group.groupid) {
-        <div class="sc-group-card" [class.sc-group-collapsed]="collapsedGroups().has(group.groupid)">
-          <div class="sc-group-header">
+        <div class="sc-group-card"
+          [class.sc-group-collapsed]="collapsedGroups().has(group.groupid)"
+          [class.sc-group-card--dragging]="dragGroupIdx() === $index"
+          [class.sc-group-card--drag-over]="dragOverGroupIdx() === $index && dragGroupIdx() !== $index">
+          <div class="sc-group-header"
+            (dragover)="onGroupDragOver($event, $index)"
+            (drop)="onGroupDrop($event, $index)"
+            (dragend)="onGroupDragEnd()">
             <div class="sc-group-left">
+              <span class="drag-handle" draggable="true"
+                (dragstart)="onGroupDragStart($event, $index)"
+                title="ลากเพื่อเรียงลำดับ">⠿</span>
               <button type="button" class="sc-collapse-btn"
                 (click)="toggleCollapse(group.groupid)"
                 [attr.aria-expanded]="!collapsedGroups().has(group.groupid)"
@@ -61,6 +70,7 @@
               <table class="sc-table">
                 <thead>
                   <tr>
+                    <th class="th-drag"></th>
                     <th>Name</th>
                     <th>Detail</th>
                     <th>URL</th>
@@ -70,7 +80,15 @@
                 </thead>
                 <tbody>
                   @for (agent of group.agents; track agent.agentid) {
-                    <tr [class.row-disabled]="agent.isactive === 0">
+                    <tr [class.row-disabled]="agent.isactive === 0"
+                      [class.sc-agent-row--dragging]="dragAgentInfo()?.groupid === group.groupid && dragAgentInfo()?.idx === $index"
+                      [class.sc-agent-row--drag-over]="dragOverAgentInfo()?.groupid === group.groupid && dragOverAgentInfo()?.idx === $index"
+                      draggable="true"
+                      (dragstart)="onAgentDragStart($event, group.groupid, $index)"
+                      (dragover)="onAgentDragOver($event, group.groupid, $index)"
+                      (drop)="onAgentDrop($event, group.groupid, $index)"
+                      (dragend)="onAgentDragEnd()">
+                      <td class="td-drag"><span class="drag-handle drag-handle--sm">⠿</span></td>
                       <td class="td-name">{{ agent.name }}</td>
                       <td class="td-detail">{{ agent.detail || '—' }}</td>
                       <td class="td-url">
