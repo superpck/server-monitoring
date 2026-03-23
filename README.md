@@ -1,7 +1,17 @@
 # Server Monitoring
 
 A web-based dashboard for monitoring server metrics in real time.  
-Consists of 3 main parts: **Agent (server-api)**, **UI (frontend)**, and **API Gateway (api)**
+Consists of 3 parts: **Agent (`server-api`)**, **API Gateway (`api`)**, and **UI (`frontend`)**.
+
+---
+
+## Screenshots
+
+**Login**  
+![Login Screen](documents/login_screen.png)
+
+**About**  
+![About Screen](documents/about_screen.png)
 
 ---
 
@@ -12,10 +22,10 @@ Consists of 3 main parts: **Agent (server-api)**, **UI (frontend)**, and **API G
 │                      frontend                       │
 │              Angular UI (port 4204)                 │
 └────────────────────┬────────────────────────────────┘
-                     │  Authorization: Bearer <UI_API_KEY>
+                     │  Authorization: Bearer <JWT token>
           ┌──────────┴──────────┐
           │         api         │   ← API Gateway (port 4000)
-          │   Express Proxy     │
+          │  Express + SQLite   │
           └──────────┬──────────┘
                      │  X-Server-Key: <server_key>
      ┌───────────────┼───────────────┐
@@ -28,10 +38,10 @@ Consists of 3 main parts: **Agent (server-api)**, **UI (frontend)**, and **API G
 ### Security Chain
 
 ```
-UI  ──[Bearer UI_API_KEY]──►  api/  ──[X-Server-Key]──►  agent
-                                                              │
-                                               ✓ SERVER_KEY match?
-                                               ✓ IP ∈ ALLOWED_IP_RANGES?
+UI  ──[Bearer JWT]──►  api/  ──[X-Server-Key]──►  agent
+                                                       │
+                                        ✓ SERVER_KEY match?
+                                        ✓ IP ∈ ALLOWED_IP_RANGES?
 ```
 
 ---
@@ -39,14 +49,15 @@ UI  ──[Bearer UI_API_KEY]──►  api/  ──[X-Server-Key]──►  age
 ## Folders
 
 ### `server-api/` — Agent
+
 Install on **every server you want to monitor**.  
 An Express API that exposes the host machine's metrics (CPU, Memory, Disk, Network, Processes, Nginx, Database).
 
-**Security:** Every request is verified by the `securityGuard` middleware before reaching any route.
+**Security:** Every request is verified by the `securityGuard` middleware.
 - `SERVER_KEY` — requests must include a matching `X-Server-Key` header
 - `ALLOWED_IP_RANGES` — (optional) restrict access to specific CIDRs (e.g. the API gateway IP)
 
-**Port:** `3000` (default, configurable via `.env`)
+**Port:** `3003` (configurable via `.env`)
 
 **Required `.env`:**
 ```env
@@ -59,7 +70,7 @@ ALLOWED_IP_RANGES=192.168.100.1/32,10.0.0.0/8   # IP of the API gateway
 **Endpoints:**
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/dashboard/summary` | Overview of all metrics (CPU, MEM, DISK, Network, Load, Processes) |
+| GET | `/dashboard/summary` | Overview metrics (CPU, MEM, Disk, Network, Load, Processes) |
 | GET | `/system` | System info |
 | GET | `/monitor` | Real-time metrics |
 | GET | `/database` | Database connection & query stats |
@@ -67,50 +78,86 @@ ALLOWED_IP_RANGES=192.168.100.1/32,10.0.0.0/8   # IP of the API gateway
 | GET | `/nginx/logs` | Nginx error logs |
 | GET | `/logs/service` | Service logs |
 
-> All endpoints require the `X-Server-Key` header (unless `SERVER_KEY` is not set in `.env`)
+> All endpoints require the `X-Server-Key` header.
 
 **Dev:**
 ```bash
 cd server-api
 npm install
-npm run dev        # nodemon + ts-node
+npm run dev
 ```
 
 **Production:**
 ```bash
-npm run build      # compile TypeScript → dist/
-npm start          # build + run
-# or use PM2 via ecosystem.config.js
+npm run build   # compile TypeScript → dist/
+npm start
+# or use PM2: pm2 start ecosystem.config.js
+```
+
+---
+
+### `api/` — Central API Gateway
+
+An Express + SQLite backend acting as a proxy between the frontend and the agents.  
+Manages server groups, agents, and user authentication.
+
+**Port:** `4000`
+
+**Required `.env`:**
+```env
+PORT=4000
+JWT_SECRET=your-jwt-secret
+API_KEY=your-ui-api-key
+```
+
+**Endpoints:**
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/auth/login` | — | Login, returns JWT |
+| GET | `/servers` | — | List all groups with their agents (ordered by `seq`) |
+| POST | `/servers/groups` | Admin | Create a group |
+| PUT | `/servers/groups/:id` | Admin | Update a group (name, detail, seq) |
+| DELETE | `/servers/groups/:id` | Admin | Delete a group (cascades agents) |
+| POST | `/servers/agents` | Admin | Create an agent |
+| PUT | `/servers/agents/:id` | Admin | Update an agent (name, url, seq, …) |
+| DELETE | `/servers/agents/:id` | Admin | Delete an agent |
+| PATCH | `/servers/agents/:id/toggle` | Admin | Toggle agent active/inactive |
+| GET/POST | `/proxy/:agentId/*` | Auth | Proxy request to the target agent |
+
+**Dev:**
+```bash
+cd api
+npm install
+npm run dev
+```
+
+**Production:**
+```bash
+npm run build
+npm start
+# or: pm2 start ecosystem.config.js
 ```
 
 ---
 
 ### `frontend/` — UI
-Angular web application for viewing metrics from all agents.
+
+Angular web application for viewing metrics from all registered agents.
 
 **Port:** `4204`
 
 **Pages:**
-- **Dashboard** — Server metrics charts (CPU, Memory, Disk, Network)
-- **Alive** — Tree view showing online/offline status of all agents with auto-refresh every 10 seconds
-- **Database** — Database monitoring
-- **Management** — Select a server and view monitors side-by-side (Server / DB / PM2 / Nginx)
-
-**Configure servers** — edit `src/app/services/server-management.service.ts` in the `getConfigServer()` method:
-```ts
-getConfigServer() {
-  return [
-    {
-      group: 'Group Name',
-      detail: 'Description',
-      agents: [
-        { name: 'Server A', detail: '', url: 'https://example.com/svr-mng' },
-      ]
-    },
-  ];
-}
-```
-> Once `api/` is complete, only `getConfigServer()` needs updating to call the HTTP endpoint — no component changes required.
+| Page | Description |
+|------|-------------|
+| **Login** | JWT-based authentication |
+| **Alive** | Tree view of all agents — online/offline status, auto-refresh every 10 s |
+| **Dashboard** | Server metrics charts (CPU, Memory, Disk, Network) |
+| **Database** | Database monitoring per agent |
+| **Nginx** | Nginx status and error log viewer |
+| **PM2** | PM2 process list |
+| **Secure** | Security log viewer |
+| **Server Config** | Admin UI — manage groups & agents, drag-and-drop reordering (persisted via `seq`) |
+| **Server Management** | Multi-server side-by-side monitoring |
 
 **Dev:**
 ```bash
@@ -126,27 +173,18 @@ npm run build      # output → dist/
 
 ---
 
-### `api/` — Central API *(planned)*
-A central API that acts as a proxy between the frontend and the agents.
-
-**Planned features:**
-- Frontend calls the central API instead of agents directly
-- Central API handles routing to the correct agent
-- Returns server group config to the frontend via `getConfigServer()` in `ServerManagementService` instead of a hardcoded array
-- Centralized authentication and rate limiting
-
----
-
 ## Quick Start
 
-1. Deploy `server-api` on each server you want to monitor
-2. Edit `getConfigServer()` in `frontend/src/app/services/server-management.service.ts` to point to your agent URLs
-3. Run the frontend
-
 ```bash
-# Terminal 1 — agent (on the server to monitor)
+# 1 — Agent (run on each server to monitor)
 cd server-api && npm run dev
 
-# Terminal 2 — frontend (on your dev machine)
+# 2 — API Gateway (run on your central server)
+cd api && npm run dev
+
+# 3 — Frontend (run on your dev machine / web server)
 cd frontend && npm start
 ```
+
+Then open [http://localhost:4204](http://localhost:4204), log in, and add your server groups & agents via **Server Config**.
+
