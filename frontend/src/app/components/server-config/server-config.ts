@@ -16,6 +16,7 @@ import {
 } from '../../services/server-config.service';
 
 interface GroupForm {
+  groupid: number;
   group: string;
   detail: string;
 }
@@ -58,7 +59,7 @@ export class ServerConfig implements OnInit {
   // ── Group modal ──────────────────────────────────────────────────────────
   protected readonly groupModalOpen = signal(false);
   protected editingGroupId = signal<number | null>(null);
-  protected groupForm = signal<GroupForm>({ group: '', detail: '' });
+  protected groupForm = signal<GroupForm>({ groupid: 0, group: '', detail: '' });
 
   // ── Agent modal ──────────────────────────────────────────────────────────
   protected readonly agentModalOpen = signal(false);
@@ -94,13 +95,13 @@ export class ServerConfig implements OnInit {
   // ── Group actions ─────────────────────────────────────────────────────────
   protected openAddGroup(): void {
     this.editingGroupId.set(null);
-    this.groupForm.set({ group: '', detail: '' });
+    this.groupForm.set({ groupid: 0, group: '', detail: '' });
     this.groupModalOpen.set(true);
   }
 
   protected openEditGroup(g: ServerConfigGroup): void {
     this.editingGroupId.set(g.groupid);
-    this.groupForm.set({ group: g.group, detail: g.detail });
+    this.groupForm.set({ groupid: g.groupid, group: g.group, detail: g.detail });
     this.groupModalOpen.set(true);
   }
 

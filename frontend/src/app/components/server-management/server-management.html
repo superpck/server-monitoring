@@ -21,10 +21,10 @@
       <span class="server-count">{{ totalAgents() }}</span>
     </div>
     <div class="server-list">
-      @for (group of groups(); track group.group) {
+      @for (group of groups(); track group.groupid) {
       <div class="server-group">
         <div class="server-group-label">
-          <span>{{ group.group }}</span>
+          <span style="margin-left: 4px;">{{ group.group }}</span>
           <span class="server-count">{{ group.agents.length }}</span>
         </div>
         @if (group.agents.length > 0) {

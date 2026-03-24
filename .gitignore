@@ -11,6 +11,7 @@ npm-debug.log
 .default
 .angular
 .vscode
+temp*
 *.tmp
 *.log
 *.bak

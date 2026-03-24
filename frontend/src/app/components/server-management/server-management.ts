@@ -17,12 +17,13 @@ import { OverviewMonitor } from '../overview-monitor/overview-monitor';
 import { ServerContextService, ServerGroup, ServerItem } from './server-context.service';
 import { PkIcon } from '../../shares/pk-icon';
 import { PkTabs, PkTabPanel, type PkTab } from '../../shares/pk-tabs';
+import { CommonModule } from '@angular/common';
 
 const SIDEBAR_BREAKPOINT = 1024;
 
 @Component({
   selector: 'app-server-management',
-  imports: [ServerMonitor, DbMonitor, Pm2Monitor, NginxMonitor, SecureMonitor, OverviewMonitor, PkIcon, PkTabs, PkTabPanel],
+  imports: [CommonModule, ServerMonitor, DbMonitor, Pm2Monitor, NginxMonitor, SecureMonitor, OverviewMonitor, PkIcon, PkTabs, PkTabPanel],
   templateUrl: './server-management.html',
   styleUrl: './server-management.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,8 +38,8 @@ export class ServerManagement implements OnInit {
   ngOnInit(): void {
     this.service.getConfigServer().then(config => {
       this.groups.set(
-        config.map(({ group, agents }) => ({
-          group,
+        config.map(({ groupid, group, agents }) => ({
+          groupid, group,
           agents: (agents ?? []).map(({ name, url, agentid }) => ({ name, url, agentid })),
         }))
       );

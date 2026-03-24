@@ -10,20 +10,22 @@ This guide covers everything a day-to-day user needs: logging in, navigating the
 1. [Getting Started](#1-getting-started)  
 2. [Navigation Overview](#2-navigation-overview)  
 3. [Server Management](#3-server-management)  
-   - [System Overview](#31-system-overview)  
-   - [Server Monitor](#32-server-monitor)  
+   - [Agent Overview](#31-agent-overview)  
+   - [System Monitor](#32-system-monitor)  
    - [PM2 Monitor](#33-pm2-monitor)  
    - [Nginx Monitor](#34-nginx-monitor)  
    - [Database Monitor](#35-database-monitor)  
    - [Log Monitor](#36-log-monitor)  
-4. [Alive Monitor](#4-alive-monitor)  
-5. [Server Configuration](#5-server-configuration) *(Admin)*  
-6. [User Management](#6-user-management) *(User Admin)*  
-   - [Managing Users](#61-managing-users)  
-   - [User Roles](#62-user-roles)  
-   - [Agent Access Control](#63-agent-access-control)  
-7. [About](#7-about)  
-8. [Troubleshooting](#8-troubleshooting)  
+4. [All Server Dashboard](#4-all-server-dashboard)  
+5. [Alive Monitor](#5-alive-monitor)  
+6. [Database Monitor](#6-database-monitor) *(Standalone)*  
+7. [Server Configuration](#7-server-configuration) *(Admin)*  
+8. [User Management](#8-user-management) *(User Admin)*  
+   - [Managing Users](#81-managing-users)  
+   - [User Roles](#82-user-roles)  
+   - [Agent Access Control](#83-agent-access-control)  
+9. [About](#9-about)  
+10. [Troubleshooting](#10-troubleshooting)  
 
 ---
 
@@ -44,25 +46,42 @@ Enter your **username** and **password**, then click **Login**.
 
 After a successful login the application redirects you to **Server Management**.
 
+> ![Login Screen](images/login_screen.png)
+
+
 ### Logging Out
 
-Click the user icon in the top-right corner of the navigation bar and select **Logout**. Your session token is removed and you are returned to the Login page.
+Click the user icon in the top-right corner of the navigation bar and select **Sign out**. Your session token is removed and you are returned to the Login page.
 
 ---
 
 ## 2. Navigation Overview
 
-The sidebar (or top navigation bar) provides links to all sections of the application.
+The top navigation bar has four main links available to every logged-in user. Additional administrative options are accessible through the **user menu** (person icon, top-right corner).
 
-| Link | Description | Who can see |
+### Top Navigation Bar
+
+| Link | Destination | Description |
 |---|---|---|
-| **Server Management** | Multi-server monitoring dashboard | Everyone |
-| **Alive** | Agent online/offline status tree | Everyone |
-| **Server Config** | Manage server groups and agents | Admin only |
-| **User Management** | Create/edit users and access control | User Admin only |
-| **About** | Application version and tech-stack info | Everyone |
+| **Server** | `/server-management` | Per-agent monitoring dashboard with six detail tabs |
+| **All Server Dashboard** | `/monitor` | All-server overview cards with live gauges |
+| **Alive** | `/alive` | Agent online/offline status tree |
+| **Database** | `/db-monitor` | Cross-server database metrics and SQL query viewer |
 
-The application supports light and dark themes. Use the theme toggle (sun/moon icon) in the navigation bar to switch.
+### User Menu
+
+Click the **person icon** in the top-right corner to open the user menu.
+
+| Item | Visible to | Description |
+|---|---|---|
+| **Config** | Admin only | Register and manage server groups and agents |
+| **Users** | User Admin only | Create/edit user accounts and access control |
+| **About** | Everyone | Application version and tech-stack information |
+| **Sign out** | Everyone | End the current session |
+
+> ![Top Menu](images/topnav_menu.png)
+
+The application supports light and dark themes. Use the **theme toggle** (sun/moon icon) in the navigation bar to switch.
 
 ---
 
@@ -74,14 +93,14 @@ Once a server agent is selected, six monitoring tabs are available across the to
 
 | Tab | Description |
 |---|---|
-| System Overview | High-level health summary |
-| Server Monitor | Real-time CPU, Memory, Disk, and Network charts |
+| Agent Overview | High-level health summary |
+| System Monitor | Real-time CPU, Memory, Disk, and Network charts |
 | PM2 Monitor | PM2 process list and status |
 | Nginx Monitor | Nginx service status and access/error logs |
 | Database Monitor | Database connection checks and query metrics |
 | Log Monitor | Security and system log viewer |
 
-### 3.1 System Overview
+### 3.1 Agent Overview
 
 Displays a compact summary of the selected server:
 
@@ -94,7 +113,7 @@ Displays a compact summary of the selected server:
 
 A colour-coded indicator (green / yellow / red) gives an at-a-glance health status for each metric.
 
-### 3.2 Server Monitor
+### 3.2 System Monitor
 
 Interactive charts (powered by Apache ECharts) that update periodically:
 
@@ -150,20 +169,113 @@ Requires `SECURE_LOG_ENABLED=true` on the agent.
 | macOS | auth, system, system-file |
 | Windows | security, system |
 
+> ![Server Management](images/server_management.png)
+
 ---
 
-## 4. Alive Monitor
+## 4. All Server Dashboard
+
+The **All Server Dashboard** (`/monitor`) provides a live overview of every registered agent on a single page — no need to navigate between servers individually.
+
+The page **auto-refreshes every 5 seconds**.
+
+### Server Cards
+
+Each agent appears as a card showing:
+
+| Area | Contents |
+|---|---|
+| Header | Hostname, agent name, and health badge |
+| Gauges | CPU, Memory, and Disk usage — colour-coded pie gauges via Apache ECharts |
+| Load Average | 1 / 5 / 15 minute load averages as a bar chart |
+| Info Grid | Uptime, Processes, Network I/O, Hardware, Platform, OS Release |
+| Nginx Log | Button to open the access / error log viewer for that server |
+
+**Health badge colours:**
+
+| Badge | Meaning |
+|---|---|
+| 🟢 Healthy | All metrics below warning threshold |
+| 🟡 Warning | Any metric ≥ 80% |
+| 🔴 Critical | Any metric ≥ 90% |
+| ⚫ Offline | Agent is unreachable |
+
+### Nginx Log Viewer
+
+Click the **Nginx Log** button on any card to open a modal with two tabs:
+
+- **Access Log** — recent HTTP requests (method, path, status code, response size, response time)
+- **Error Log** — recent Nginx error entries
+
+Requires `NGINX_LOG_ENABLED=true` on the agent.
+
+> ![Server Monitor](images/server_monitor.png)
+
+---
+
+## 5. Alive Monitor
 
 The **Alive** page gives you a bird's-eye view of every registered agent.
 
-- Agents are listed in an expandable tree grouped by **Server Group**.
-- Each agent shows its **online / offline** status (checked against the agent's `/system/health` endpoint).
+- Agents are displayed in a tree layout grouped by **Server Group**.
+- Each agent shows its **online / offline** status (checked against the agent's `/system/health` endpoint), along with current CPU, Memory, and Disk percentages when online.
 - The page **auto-refreshes every 10 seconds** so you can see changes without reloading.
-- An offline agent is highlighted in red to draw immediate attention.
+- The status indicator uses colour coding: 🟢 green (healthy), 🟡 yellow (≥80%), 🔴 red / blinking (≥90%), grey (offline).
+- An offline agent shows a blinking error badge with the reason.
+- **Click any agent node** to open a detail panel showing CPU, Memory, Disk, Load Average, Network I/O, and Processes.
+- Use the **↔ H / ↕ V** buttons in the top-right to switch between horizontal and vertical tree layouts. Your preference is saved automatically.
+
+> ![Server Alive](images/server_alive_horizontal.png)
+> ![Server Alive](images/server_alive_vertical.png)
 
 ---
 
-## 5. Server Configuration
+## 6. Database Monitor
+
+The **Database Monitor** page (`/db-monitor`) provides a real-time view of every configured database across all servers simultaneously. This is a standalone dashboard — distinct from the **Database Monitor tab** inside Server Management, which only shows the currently selected agent.
+
+The page **auto-refreshes every 10 seconds**.
+
+Requires `DB_MONITOR_ENABLED=true` and at least one `DB_<ID>_*` connection configured in each agent's `.env`.
+
+### Layout
+
+Servers are grouped by **Server Group**. Each database instance on an agent is shown as a separate card.
+
+Each database card displays:
+
+| Area | Description |
+|---|---|
+| Header | Database vendor badge, status badge (Up / Down), version, uptime |
+| Metric Sparklines | Rolling 15-minute history charts for each tracked metric |
+| SQL Queries button | Opens a full-screen SQL query viewer for that database |
+
+### Tracked Metrics
+
+| Metric | Description |
+|---|---|
+| Threads Connected | Current number of connected clients |
+| Threads Running | Clients actively executing a query |
+| Connections | Total connection attempts since server startup |
+| Max Connections | Configured maximum connection limit |
+| Questions | Total queries executed since server startup |
+| Slow Queries | Queries exceeding `long_query_time` |
+
+> ![Database monitor](images/database_screen.png)
+
+### SQL Query Viewer
+
+Click the **SQL Queries** button on a database card to open the full-screen query viewer.
+
+- **Columns**: User, DB, Command, Time, State, Query text
+- **Sortable** — click any column header to sort
+- **Auto-reload** — use the selector to refresh automatically (5 s, 10 s, 30 s, or off)
+
+> ![Query](images/query_monitor.png)
+
+---
+
+## 7. Server Configuration
 
 *Requires Admin role.*
 
@@ -178,6 +290,8 @@ Servers are organised into **Groups** (e.g. Production, Staging, Internal Tools)
 - Click the **× circle** icon to delete a group. Deleting a group removes all its agents as well.
 - Drag the **⠿ handle** on a group card to reorder groups. The order is saved automatically.
 - Click the collapse arrow to show/hide the agents inside a group.
+
+> ![Agent List](images/agent_list.png)
 
 ### Agents
 
@@ -194,13 +308,15 @@ Each group can contain one or more **Agents** (individual servers running `serve
 - Drag the **⠿ handle** on an agent row to reorder agents within the group.
 - Use the **toggle switch** in the Status column to activate or deactivate an agent without deleting it. Inactive agents are hidden from the monitoring views.
 
+> ![Agent Edit](images/agent_edit.png)
+
 ---
 
-## 6. User Management
+## 8. User Management
 
 *Requires User Admin permission (`user_admin = 1`).*
 
-### 6.1 Managing Users
+### 8.1 Managing Users
 
 The **User Management** page lists all registered accounts.
 
@@ -211,9 +327,12 @@ The **User Management** page lists all registered accounts.
   - User Admin — whether this account can manage other users
   - Password (minimum length enforced)
 - **Edit User** — click the **pencil** icon on a user row to update name, role, user_admin flag, or password (leave password blank to keep the existing one).
-- **Delete User** — click the **× circle** icon. You cannot delete the `superadmin` account.
+- **Delete User** — click the **× circle** icon. You cannot delete the `superadmin` account or your own account.
 
-### 6.2 User Roles
+> ![user list](images/userlist.png)
+
+
+### 8.2 User Roles
 
 | Role | Description |
 |---|---|
@@ -224,7 +343,9 @@ The **User Admin** flag is independent of role — a `monitor` user can be grant
 
 The **superadmin** account is defined in the server `.env` file (`SUPERADMIN_PASSWORD`). It is always an admin, does not appear in the database, and cannot be deleted from the UI.
 
-### 6.3 Agent Access Control
+> ![user edit](images/user_edit.png)
+
+### 8.3 Agent Access Control
 
 By default every non-admin user can see **all agents**. You can restrict a user to a specific subset.
 
@@ -240,11 +361,13 @@ By default every non-admin user can see **all agents**. You can restrict a user 
    - A group checkbox shows a **dash (—)** when only some of its agents are selected.
 5. Click **Save**.
 
+> ![user access](images/user_access.png)
+
 The restriction applies immediately. The user will only see the permitted agents in the Server Management sidebar and Alive monitor.
 
 ---
 
-## 7. About
+## 9. About
 
 The **About** page displays:
 
@@ -253,9 +376,11 @@ The **About** page displays:
 - Technology stack (Angular, TypeScript, Node.js, Express, ECharts, ngx-echarts)
 - Links to relevant project sites
 
+> ![About](images/about_screen.png)
+
 ---
 
-## 8. Troubleshooting
+## 10. Troubleshooting
 
 ### Login fails with "Invalid credentials"
 
