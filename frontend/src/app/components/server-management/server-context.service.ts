@@ -7,6 +7,7 @@ export interface ServerItem {
 }
 
 export interface ServerGroup {
+  groupid?: number;
   group: string;
   agents: ServerItem[];
 }

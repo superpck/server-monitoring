@@ -43,6 +43,7 @@ Enter your **username** and **password**, then click **Login**.
 > **Important:** Change the default passwords immediately after first login. The `superadmin` account is configured separately in the server environment.
 
 After a successful login the application redirects you to **Server Management**.
+
 > ![Login Screen](images/login_screen.png)
 
 
@@ -63,6 +64,8 @@ The sidebar (or top navigation bar) provides links to all sections of the applic
 | **Server Config** | Manage server groups and agents | Admin only |
 | **User Management** | Create/edit users and access control | User Admin only |
 | **About** | Application version and tech-stack info | Everyone |
+
+> ![Top Menu](images/topnav_menu.png)
 
 The application supports light and dark themes. Use the theme toggle (sun/moon icon) in the navigation bar to switch.
 
@@ -152,6 +155,8 @@ Requires `SECURE_LOG_ENABLED=true` on the agent.
 | macOS | auth, system, system-file |
 | Windows | security, system |
 
+> ![Server Management](images/server_management.png)
+
 ---
 
 ## 4. Alive Monitor
@@ -162,6 +167,9 @@ The **Alive** page gives you a bird's-eye view of every registered agent.
 - Each agent shows its **online / offline** status (checked against the agent's `/system/health` endpoint).
 - The page **auto-refreshes every 10 seconds** so you can see changes without reloading.
 - An offline agent is highlighted in red to draw immediate attention.
+
+> ![Server Alive](images/server_alive_horizontal.png)
+> ![Server Alive](images/server_alive_vertical.png)
 
 ---
 
@@ -181,6 +189,8 @@ Servers are organised into **Groups** (e.g. Production, Staging, Internal Tools)
 - Drag the **⠿ handle** on a group card to reorder groups. The order is saved automatically.
 - Click the collapse arrow to show/hide the agents inside a group.
 
+> ![Agent List](images/agent_list.png)
+
 ### Agents
 
 Each group can contain one or more **Agents** (individual servers running `server-api`).
@@ -195,6 +205,8 @@ Each group can contain one or more **Agents** (individual servers running `serve
 - Click the **× circle** icon to delete an agent.
 - Drag the **⠿ handle** on an agent row to reorder agents within the group.
 - Use the **toggle switch** in the Status column to activate or deactivate an agent without deleting it. Inactive agents are hidden from the monitoring views.
+
+> ![Agent Edit](images/agent_edit.png)
 
 ---
 
@@ -215,6 +227,9 @@ The **User Management** page lists all registered accounts.
 - **Edit User** — click the **pencil** icon on a user row to update name, role, user_admin flag, or password (leave password blank to keep the existing one).
 - **Delete User** — click the **× circle** icon. You cannot delete the `superadmin` account.
 
+> ![user list](images/userlist.png)
+
+
 ### 6.2 User Roles
 
 | Role | Description |
@@ -225,6 +240,8 @@ The **User Management** page lists all registered accounts.
 The **User Admin** flag is independent of role — a `monitor` user can be granted User Admin rights to manage other accounts without gaining admin-level server access.
 
 The **superadmin** account is defined in the server `.env` file (`SUPERADMIN_PASSWORD`). It is always an admin, does not appear in the database, and cannot be deleted from the UI.
+
+> ![user edit](images/user_edit.png)
 
 ### 6.3 Agent Access Control
 
@@ -242,6 +259,8 @@ By default every non-admin user can see **all agents**. You can restrict a user 
    - A group checkbox shows a **dash (—)** when only some of its agents are selected.
 5. Click **Save**.
 
+> ![user access](images/user_access.png)
+
 The restriction applies immediately. The user will only see the permitted agents in the Server Management sidebar and Alive monitor.
 
 ---
@@ -254,6 +273,8 @@ The **About** page displays:
 - Architecture workflow diagram (Frontend → API Gateway → Server Agents)
 - Technology stack (Angular, TypeScript, Node.js, Express, ECharts, ngx-echarts)
 - Links to relevant project sites
+
+> ![About](images/about_screen.png)
 
 ---
 

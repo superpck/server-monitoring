@@ -29,6 +29,7 @@ export interface AliveAgent {
 }
 
 export interface AliveGroup {
+  groupid?: number;
   group: string;
   detail: string;
   agents: AliveAgent[];
@@ -64,7 +65,8 @@ export class Alive implements OnInit {
     let config = await this.service.getConfigServer();
     config = config.filter(c => c.agents && c.agents.length > 0);
     this.groups.set(
-      config.map(({ group, detail, agents }) => ({
+      config.map(({ groupid, group, detail, agents }) => ({
+        groupid,
         group,
         detail,
         agents: agents.map(({ name: key, detail, url: baseUrl }) => ({
