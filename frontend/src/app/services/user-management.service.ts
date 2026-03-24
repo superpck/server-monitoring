@@ -11,6 +11,12 @@ export interface User {
   user_admin: number;
 }
 
+export interface UserAccess {
+  status: number;
+  access_type: 'all' | 'partial';
+  agents: number[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class UserManagementService {
   private readonly http = inject(HttpClient);
@@ -42,6 +48,18 @@ export class UserManagementService {
   delete(userid: number): Promise<unknown> {
     return firstValueFrom(
       this.http.delete(`${config.apiUrl}/users/${userid}`, { headers: this.authHeaders })
+    );
+  }
+
+  getAccess(userid: number): Promise<UserAccess> {
+    return firstValueFrom(
+      this.http.get<UserAccess>(`${config.apiUrl}/users/${userid}/access`, { headers: this.authHeaders })
+    );
+  }
+
+  updateAccess(userid: number, body: { access_type: 'all' | 'partial'; agents?: number[] }): Promise<unknown> {
+    return firstValueFrom(
+      this.http.put(`${config.apiUrl}/users/${userid}/access`, body, { headers: this.authHeaders })
     );
   }
 }

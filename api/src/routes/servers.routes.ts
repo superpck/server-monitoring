@@ -34,7 +34,8 @@ router.get('/', optionalAuth, (req: Request, res: Response) => {
     .all()
 
   // ── Apply user access filter for non-admin authenticated users ────────────
-  const user = req.user as JwtPayload | null
+  const user = req.user as JwtPayload | null;
+  console.log(user);
   if (user && typeof user === 'object' && user['role'] !== 'admin' && user['userid'] > 0) {
     const access = db
       .prepare<[number], { access_type: string }>('SELECT access_type FROM user_access WHERE userid = ?')

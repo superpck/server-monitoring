@@ -29,6 +29,9 @@ export class PkModal {
   /** Panel max-width: sm=380px | md=560px (default) | lg=860px | xl=1280px | full=100vw */
   readonly size = input<'sm' | 'md' | 'lg' | 'xl' | 'full'>('md');
 
+  /** When true, clicking the backdrop or pressing Escape will NOT close the modal */
+  readonly disableBackdropClose = input<boolean>(false);
+
   /** Emitted when the user closes the modal (backdrop click, ✕ button, or Escape) */
   readonly closed = output<void>();
 
@@ -44,12 +47,14 @@ export class PkModal {
   }
 
   protected onBackdropClick(event: MouseEvent): void {
+    if (this.disableBackdropClose()) return;
     if (event.target === event.currentTarget) {
       this.closed.emit();
     }
   }
 
   protected onKeydown(event: KeyboardEvent): void {
+    if (this.disableBackdropClose()) return;
     if (event.key === 'Escape' && this.isOpen()) {
       this.closed.emit();
     }
