@@ -4,23 +4,19 @@
     <span class="brand-name">{{ appName }}</span>
   </a>
 
-  <button
-    class="btn-menu"
-    type="button"
-    (click)="menuOpen.update(v => !v)"
-    [attr.aria-expanded]="menuOpen()"
+  <button class="btn-menu" type="button" (click)="menuOpen.update(v => !v)" [attr.aria-expanded]="menuOpen()"
     aria-label="Toggle navigation menu">
     @if (menuOpen()) {
-      <pk-icon name="x-circle" [size]="20" />
+    <pk-icon name="x-circle" [size]="20" />
     } @else {
-      <pk-icon name="sidebar-open" [size]="20" />
+    <pk-icon name="sidebar-open" [size]="20" />
     }
   </button>
 
   <ul class="nav-links" [class.nav-links--open]="menuOpen()" role="list">
     <li>
-      <a class="nav-link" routerLink="/server-management" routerLinkActive="nav-link--active" ariaCurrentWhenActive="page"
-        (click)="closeMenu()">
+      <a class="nav-link" routerLink="/server-management" routerLinkActive="nav-link--active"
+        ariaCurrentWhenActive="page" (click)="closeMenu()">
         Server
       </a>
     </li>
@@ -44,68 +40,64 @@
     </li>
   </ul>
 
-  <button
-    class="btn-theme"
-    type="button"
-    (click)="themeService.toggle()"
+  <button class="btn-theme" type="button" (click)="themeService.toggle()"
     [attr.aria-label]="themeService.isDark() ? 'Switch to light mode' : 'Switch to dark mode'"
     [attr.title]="themeService.isDark() ? 'Switch to light mode' : 'Switch to dark mode'">
     @if (themeService.isDark()) {
-      <pk-icon name="sun" [size]="16" />
+    <pk-icon name="sun" [size]="16" />
     } @else {
-      <pk-icon name="moon" [size]="16" />
+    <pk-icon name="moon" [size]="16" />
     }
   </button>
 
   <div class="user-menu" [class.user-menu--open]="userMenuOpen()">
-    <button class="btn-user" type="button"
-      (click)="userMenuOpen.update(v => !v)"
-      [attr.aria-expanded]="userMenuOpen()"
+    <button class="btn-user" type="button" (click)="userMenuOpen.update(v => !v)" [attr.aria-expanded]="userMenuOpen()"
       aria-haspopup="true">
       <pk-icon name="user" [size]="15" />
       <span class="user-name">{{ auth.displayName() }}</span>
       <pk-icon name="chevron-down" [size]="13" />
     </button>
     <ul class="user-dropdown" role="menu">
+      <li role="none">
+        <a class="user-dropdown-item" routerLink="/about" role="menuitem" (click)="closeUserMenu()">
+          <pk-icon name="home" [size]="15" /> About
+        </a>
+      </li>
+      <li class="user-dropdown-divider" role="separator"></li>
       @if (auth.isAdmin()) {
-        <li role="none">
-          <a class="user-dropdown-item" routerLink="/server-config" role="menuitem" (click)="closeUserMenu()">
-            <pk-icon name="key" [size]="15" /> Config
-          </a>
-        </li>
+      <li role="none">
+        <a class="user-dropdown-item" routerLink="/server-config" role="menuitem" (click)="closeUserMenu()">
+          <pk-icon name="key" [size]="15" /> Config
+        </a>
+      </li>
       }
       @if (auth.isUserAdmin()) {
-        <li role="none">
-          <a class="user-dropdown-item" routerLink="/user-management" role="menuitem" (click)="closeUserMenu()">
-            <pk-icon name="user" [size]="15" /> Users
-          </a>
-        </li>
+      <li role="none">
+        <a class="user-dropdown-item" routerLink="/user-management" role="menuitem" (click)="closeUserMenu()">
+          <pk-icon name="user" [size]="15" /> Users
+        </a>
+      </li>
       }
       <li role="none">
         <a class="user-dropdown-item" routerLink="/pk-ui" role="menuitem" (click)="closeUserMenu()">
           <pk-icon name="code" [size]="15" /> PK UI
         </a>
       </li>
+      <li class="user-dropdown-divider" role="separator"></li>
       <li role="none">
         <button class="user-dropdown-item" type="button" role="menuitem" (click)="logout()">
           <pk-icon name="sign-in" [size]="15" /> Sign out
         </button>
-      </li>
-      <li class="user-dropdown-divider" role="separator"></li>
-      <li role="none">
-        <a class="user-dropdown-item" routerLink="/about" role="menuitem" (click)="closeUserMenu()">
-          <pk-icon name="home" [size]="15" /> About
-        </a>
       </li>
     </ul>
   </div>
 </nav>
 
 @if (menuOpen()) {
-  <div class="nav-overlay" (click)="closeMenu()" aria-hidden="true"></div>
+<div class="nav-overlay" (click)="closeMenu()" aria-hidden="true"></div>
 }
 @if (userMenuOpen()) {
-  <div class="user-menu-overlay" (click)="closeUserMenu()" aria-hidden="true"></div>
+<div class="user-menu-overlay" (click)="closeUserMenu()" aria-hidden="true"></div>
 }
 
 <div class="content">
