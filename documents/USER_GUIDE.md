@@ -16,14 +16,16 @@ This guide covers everything a day-to-day user needs: logging in, navigating the
    - [Nginx Monitor](#34-nginx-monitor)  
    - [Database Monitor](#35-database-monitor)  
    - [Log Monitor](#36-log-monitor)  
-4. [Alive Monitor](#4-alive-monitor)  
-5. [Server Configuration](#5-server-configuration) *(Admin)*  
-6. [User Management](#6-user-management) *(User Admin)*  
-   - [Managing Users](#61-managing-users)  
-   - [User Roles](#62-user-roles)  
-   - [Agent Access Control](#63-agent-access-control)  
-7. [About](#7-about)  
-8. [Troubleshooting](#8-troubleshooting)  
+4. [All Server Dashboard](#4-all-server-dashboard)  
+5. [Alive Monitor](#5-alive-monitor)  
+6. [Database Monitor](#6-database-monitor) *(Standalone)*  
+7. [Server Configuration](#7-server-configuration) *(Admin)*  
+8. [User Management](#8-user-management) *(User Admin)*  
+   - [Managing Users](#81-managing-users)  
+   - [User Roles](#82-user-roles)  
+   - [Agent Access Control](#83-agent-access-control)  
+9. [About](#9-about)  
+10. [Troubleshooting](#10-troubleshooting)  
 
 ---
 
@@ -49,25 +51,37 @@ After a successful login the application redirects you to **Server Management**.
 
 ### Logging Out
 
-Click the user icon in the top-right corner of the navigation bar and select **Logout**. Your session token is removed and you are returned to the Login page.
+Click the user icon in the top-right corner of the navigation bar and select **Sign out**. Your session token is removed and you are returned to the Login page.
 
 ---
 
 ## 2. Navigation Overview
 
-The sidebar (or top navigation bar) provides links to all sections of the application.
+The top navigation bar has four main links available to every logged-in user. Additional administrative options are accessible through the **user menu** (person icon, top-right corner).
 
-| Link | Description | Who can see |
+### Top Navigation Bar
+
+| Link | Destination | Description |
 |---|---|---|
-| **Server Management** | Multi-server monitoring dashboard | Everyone |
-| **Alive** | Agent online/offline status tree | Everyone |
-| **Server Config** | Manage server groups and agents | Admin only |
-| **User Management** | Create/edit users and access control | User Admin only |
-| **About** | Application version and tech-stack info | Everyone |
+| **Server** | `/server-management` | Per-agent monitoring dashboard with six detail tabs |
+| **All Server Dashboard** | `/monitor` | All-server overview cards with live gauges |
+| **Alive** | `/alive` | Agent online/offline status tree |
+| **Database** | `/db-monitor` | Cross-server database metrics and SQL query viewer |
+
+### User Menu
+
+Click the **person icon** in the top-right corner to open the user menu.
+
+| Item | Visible to | Description |
+|---|---|---|
+| **Config** | Admin only | Register and manage server groups and agents |
+| **Users** | User Admin only | Create/edit user accounts and access control |
+| **About** | Everyone | Application version and tech-stack information |
+| **Sign out** | Everyone | End the current session |
 
 > ![Top Menu](images/topnav_menu.png)
 
-The application supports light and dark themes. Use the theme toggle (sun/moon icon) in the navigation bar to switch.
+The application supports light and dark themes. Use the **theme toggle** (sun/moon icon) in the navigation bar to switch.
 
 ---
 
@@ -159,7 +173,45 @@ Requires `SECURE_LOG_ENABLED=true` on the agent.
 
 ---
 
-## 4. Alive Monitor
+## 4. All Server Dashboard
+
+The **All Server Dashboard** (`/monitor`) provides a live overview of every registered agent on a single page — no need to navigate between servers individually.
+
+The page **auto-refreshes every 5 seconds**.
+
+### Server Cards
+
+Each agent appears as a card showing:
+
+| Area | Contents |
+|---|---|
+| Header | Hostname, agent name, and health badge |
+| Gauges | CPU, Memory, and Disk usage — colour-coded pie gauges via Apache ECharts |
+| Load Average | 1 / 5 / 15 minute load averages as a bar chart |
+| Info Grid | Uptime, Processes, Network I/O, Hardware, Platform, OS Release |
+| Nginx Log | Button to open the access / error log viewer for that server |
+
+**Health badge colours:**
+
+| Badge | Meaning |
+|---|---|
+| 🟢 Healthy | All metrics below warning threshold |
+| 🟡 Warning | Any metric ≥ 70% |
+| 🔴 Critical | Any metric ≥ 90% |
+| ⚫ Offline | Agent is unreachable |
+
+### Nginx Log Viewer
+
+Click the **Nginx Log** button on any card to open a modal with two tabs:
+
+- **Access Log** — recent HTTP requests (method, path, status code, response size, response time)
+- **Error Log** — recent Nginx error entries
+
+Requires `NGINX_LOG_ENABLED=true` on the agent.
+
+---
+
+## 5. Alive Monitor
 
 The **Alive** page gives you a bird's-eye view of every registered agent.
 
@@ -176,7 +228,48 @@ The **Alive** page gives you a bird's-eye view of every registered agent.
 
 ---
 
-## 5. Server Configuration
+## 6. Database Monitor
+
+The **Database Monitor** page (`/db-monitor`) provides a real-time view of every configured database across all servers simultaneously. This is a standalone dashboard — distinct from the **Database Monitor tab** inside Server Management, which only shows the currently selected agent.
+
+The page **auto-refreshes every 10 seconds**.
+
+Requires `DB_MONITOR_ENABLED=true` and at least one `DB_<ID>_*` connection configured in each agent's `.env`.
+
+### Layout
+
+Servers are grouped by **Server Group**. Each database instance on an agent is shown as a separate card.
+
+Each database card displays:
+
+| Area | Description |
+|---|---|
+| Header | Database vendor badge, status badge (Up / Down), version, uptime |
+| Metric Sparklines | Rolling 15-minute history charts for each tracked metric |
+| SQL Queries button | Opens a full-screen SQL query viewer for that database |
+
+### Tracked Metrics
+
+| Metric | Description |
+|---|---|
+| Threads Connected | Current number of connected clients |
+| Threads Running | Clients actively executing a query |
+| Connections | Total connection attempts since server startup |
+| Max Connections | Configured maximum connection limit |
+| Questions | Total queries executed since server startup |
+| Slow Queries | Queries exceeding `long_query_time` |
+
+### SQL Query Viewer
+
+Click the **SQL Queries** button on a database card to open the full-screen query viewer.
+
+- **Columns**: User, DB, Command, Time, State, Query text
+- **Sortable** — click any column header to sort
+- **Auto-reload** — use the selector to refresh automatically (5 s, 10 s, 30 s, or off)
+
+---
+
+## 7. Server Configuration
 
 *Requires Admin role.*
 
@@ -213,11 +306,11 @@ Each group can contain one or more **Agents** (individual servers running `serve
 
 ---
 
-## 6. User Management
+## 8. User Management
 
 *Requires User Admin permission (`user_admin = 1`).*
 
-### 6.1 Managing Users
+### 8.1 Managing Users
 
 The **User Management** page lists all registered accounts.
 
@@ -233,7 +326,7 @@ The **User Management** page lists all registered accounts.
 > ![user list](images/userlist.png)
 
 
-### 6.2 User Roles
+### 8.2 User Roles
 
 | Role | Description |
 |---|---|
@@ -246,7 +339,7 @@ The **superadmin** account is defined in the server `.env` file (`SUPERADMIN_PAS
 
 > ![user edit](images/user_edit.png)
 
-### 6.3 Agent Access Control
+### 8.3 Agent Access Control
 
 By default every non-admin user can see **all agents**. You can restrict a user to a specific subset.
 
@@ -268,7 +361,7 @@ The restriction applies immediately. The user will only see the permitted agents
 
 ---
 
-## 7. About
+## 9. About
 
 The **About** page displays:
 
@@ -281,7 +374,7 @@ The **About** page displays:
 
 ---
 
-## 8. Troubleshooting
+## 10. Troubleshooting
 
 ### Login fails with "Invalid credentials"
 
