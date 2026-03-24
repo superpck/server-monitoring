@@ -173,6 +173,9 @@
 .btn-danger-ghost { background: transparent; color: #f87171; border-color: transparent; }
 .btn-danger-ghost:hover:not(:disabled) { background: rgba(239, 68, 68, 0.1); }
 
+.btn-access-ghost { background: transparent; color: #60a5fa; border-color: transparent; }
+.btn-access-ghost:hover:not(:disabled) { background: rgba(59, 130, 246, 0.1); }
+
 .btn-xs { padding: 3px 7px; font-size: 0.78rem; gap: 3px; }
 
 /* ── Secret input ────────────────────────────────────────────────────────── */
@@ -292,6 +295,41 @@
   line-height: 1.6;
 }
 .delete-icon { color: #f87171; flex-shrink: 0; margin-top: 2px; }
+
+/* ── Access modal ───────────────────────────────────────────────────────── */
+.access-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 24px;
+  color: var(--color-text-muted);
+}
+
+.access-body { display: flex; flex-direction: column; gap: 14px; }
+
+.agent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.agent-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid var(--border-color-2);
+  background: var(--bg-surface-2);
+  transition: background 0.15s;
+}
+.agent-item:hover { background: var(--bg-hover); }
+.agent-item input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--primary-color); flex-shrink: 0; }
+.agent-name { font-size: 0.84rem; font-weight: 500; color: var(--text-primary); flex: 1; }
+.agent-group { font-size: 0.76rem; color: var(--color-text-muted); }
 
 /* ── Spinner ─────────────────────────────────────────────────────────────── */
 .spinner {

@@ -56,6 +56,11 @@
             <button type="button" class="btn btn-xs btn-ghost" title="Edit" (click)="openEditUser(user)">
               <pk-icon name="pencil" [size]="13" />
             </button>
+            @if (user.role !== 'admin') {
+            <button type="button" class="btn btn-xs btn-access-ghost" title="Access" (click)="openAccessModal(user)">
+              <pk-icon name="key" [size]="13" />
+            </button>
+            }
             <button type="button" class="btn btn-xs btn-danger-ghost" title="Delete" [disabled]="isSelf(user)"
               [title]="isSelf(user) ? 'Cannot delete your own account' : 'Delete'"
               (click)="!isSelf(user) && confirmDeleteUser(user)">
@@ -72,6 +77,7 @@
 
 <!-- ── Add / Edit Modal ──────────────────────────────────────────────────── -->
 <pk-modal [title]="isEditing() ? 'Edit User' : 'Add User'" [isOpen]="modalOpen()" size="sm"
+  [disableBackdropClose]="true"
   (closed)="modalOpen.set(false)">
 
   <div class="form-body">
@@ -131,6 +137,53 @@
       [disabled]="saving() || !userForm().name.trim() || (!isEditing() && !userForm().username.trim()) || (!isEditing() && !userForm().password.trim())"
       (click)="saveUser()">
       @if (saving()) {
+        <span class="spinner spinner-sm"></span>
+      } @else {
+        <pk-icon name="save" [size]="14" />
+      }
+      Save
+    </button>
+  </div>
+</pk-modal>
+
+<!-- ── Access Modal ─────────────────────────────────────────────────────── -->
+<pk-modal [title]="'Access: ' + (accessTarget()?.name || accessTarget()?.username || '')" [isOpen]="accessModalOpen()" size="sm"
+  [disableBackdropClose]="true"
+  (closed)="accessModalOpen.set(false)">
+
+  @if (accessLoading()) {
+  <div class="access-loading">
+    <span class="spinner"></span> Loading…
+  </div>
+  } @else {
+  <div class="access-body">
+    <div class="form-field">
+      <label class="form-label">Access Type</label>
+      <select class="form-input" [value]="accessType()" (change)="accessType.set($any($event.target).value)">
+        <option value="all">All — can see all agents</option>
+        <option value="partial">Partial — selected agents only</option>
+      </select>
+    </div>
+    @if (accessType() === 'partial') {
+    <div class="agent-list">
+      @for (agent of accessAgentList(); track agent.agentid) {
+      <label class="agent-item">
+        <input type="checkbox" [checked]="agent.checked" (change)="toggleAgentAccess(agent.agentid)" />
+        <span class="agent-name">{{ agent.name }}</span>
+        <span class="agent-group">{{ agent.group }}</span>
+      </label>
+      }
+    </div>
+    }
+  </div>
+  }
+
+  <div class="modal-footer" pk-modal-footer>
+    <button type="button" class="btn btn-ghost" (click)="accessModalOpen.set(false)">
+      <pk-icon name="x" [size]="14" /> Cancel
+    </button>
+    <button type="button" class="btn btn-primary" [disabled]="accessSaving() || accessLoading()" (click)="saveAccess()">
+      @if (accessSaving()) {
         <span class="spinner spinner-sm"></span>
       } @else {
         <pk-icon name="save" [size]="14" />

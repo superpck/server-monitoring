@@ -9,21 +9,21 @@ import { JWT_SECRET, UI_API_KEY } from '../config'
  */
 export function auth(req: Request, res: Response, next: NextFunction): void {
   const header = req.headers['authorization']
-  req.user = null
+  req.user = null;
   if (!header || !header.startsWith('Bearer ')) {
     res.status(401).json({ error: 'Unauthorized', message: 'Missing Authorization header' })
     return
   }
 
-  const token = header.slice('Bearer '.length)
+  const token = header.slice('Bearer '.length);
 
   // ── 1. Try JWT ────────────────────────────────────────────────────────────
   if (JWT_SECRET) {
     try {
-      const decoded = jwt.verify(token, JWT_SECRET)
+      const decoded = jwt.verify(token, JWT_SECRET);
       req.user = decoded;
-      next()
-      return
+      next();
+      return;
     } catch {
       // Not a valid JWT — fall through to static key check
     }

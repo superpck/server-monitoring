@@ -10,7 +10,8 @@ import { FormsModule } from '@angular/forms';
 import { PkIcon } from '../../shares/pk-icon';
 import { PkModal } from '../../shares/pk-modal';
 import { PkToastrService } from '../../shares/pk-toastr';
-import { UserManagementService, User } from '../../services/user-management.service';
+import { UserManagementService, User, UserAccess } from '../../services/user-management.service';
+import { ServerConfigService } from '../../services/server-config.service';
 import { AuthService } from '../../services/auth.service';
 
 interface UserForm {
@@ -19,6 +20,13 @@ interface UserForm {
   role: 'admin' | 'monitor';
   user_admin: number;
   password: string;
+}
+
+interface AgentItem {
+  agentid: number;
+  name: string;
+  group: string;
+  checked: boolean;
 }
 
 @Component({
@@ -30,6 +38,7 @@ interface UserForm {
 })
 export class UserManagement implements OnInit {
   private readonly svc = inject(UserManagementService);
+  private readonly serverConfig = inject(ServerConfigService);
   private readonly toastr = inject(PkToastrService);
   protected readonly auth = inject(AuthService);
 
@@ -48,6 +57,14 @@ export class UserManagement implements OnInit {
   // Delete confirm modal
   protected readonly deleteModalOpen = signal(false);
   protected readonly deleteTarget = signal<{ userid: number; label: string } | null>(null);
+
+  // Access modal
+  protected readonly accessModalOpen = signal(false);
+  protected readonly accessTarget = signal<User | null>(null);
+  protected readonly accessType = signal<'all' | 'partial'>('all');
+  protected readonly accessAgentList = signal<AgentItem[]>([]);
+  protected readonly accessLoading = signal(false);
+  protected readonly accessSaving = signal(false);
 
   protected readonly isEditing = computed(() => this.editingUserId() !== null);
 
@@ -156,5 +173,61 @@ export class UserManagement implements OnInit {
 
   protected isSelf(user: User): boolean {
     return user.username === this.auth.username();
+  }
+
+  protected async openAccessModal(user: User): Promise<void> {
+    this.accessTarget.set(user);
+    this.accessType.set('all');
+    this.accessAgentList.set([]);
+    this.accessLoading.set(true);
+    this.accessModalOpen.set(true);
+    try {
+      const [access, groups] = await Promise.all([
+        this.svc.getAccess(user.userid),
+        this.serverConfig.getAll(),
+      ]);
+      this.accessType.set(access.access_type);
+      const allowedSet = new Set(access.agents);
+      const items: AgentItem[] = groups.flatMap(g =>
+        g.agents.map(a => ({
+          agentid: a.agentid,
+          name: a.name,
+          group: g.group,
+          checked: allowedSet.has(a.agentid),
+        }))
+      );
+      this.accessAgentList.set(items);
+    } catch {
+      this.toastr.error('Failed to load access data');
+      this.accessModalOpen.set(false);
+    } finally {
+      this.accessLoading.set(false);
+    }
+  }
+
+  protected toggleAgentAccess(agentid: number): void {
+    this.accessAgentList.update(list =>
+      list.map(a => a.agentid === agentid ? { ...a, checked: !a.checked } : a)
+    );
+  }
+
+  protected async saveAccess(): Promise<void> {
+    const user = this.accessTarget();
+    if (!user) return;
+    const accessType = this.accessType();
+    const agents = this.accessAgentList().filter(a => a.checked).map(a => a.agentid);
+    this.accessSaving.set(true);
+    try {
+      await this.svc.updateAccess(user.userid, {
+        access_type: accessType,
+        agents: accessType === 'partial' ? agents : [],
+      });
+      this.toastr.success('Access updated');
+      this.accessModalOpen.set(false);
+    } catch (err: any) {
+      this.toastr.error(err?.error?.message ?? 'Failed to update access');
+    } finally {
+      this.accessSaving.set(false);
+    }
   }
 }

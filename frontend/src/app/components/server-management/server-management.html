@@ -62,63 +62,26 @@
     </div>
 
     <div class="monitoring-sections">
-      <!-- System Overview Section -->
-      <section class="monitor-section">
-        <h3 class="section-title">
-          <pk-icon name="info" />
-          System Overview
-        </h3>
-        <div class="monitor-section-selector">
+      <pk-tabs [tabs]="monitorTabs" [(activeId)]="activeMonitorTab">
+        <div *pkTabPanel="'overview'" class="monitor-tab-panel">
           <app-overview-monitor />
         </div>
-      </section>
-
-      <!-- Server Monitor Section -->
-      <section class="monitor-section">
-        <h3 class="section-title">
-          <pk-icon name="activity" />
-          Server Monitor
-        </h3>
-        <div class="monitor-section-selector">
+        <div *pkTabPanel="'server'" class="monitor-tab-panel">
           <app-server-monitor />
         </div>
-      </section>
-
-      <!-- Database Monitor Section -->
-      <section class="monitor-section">
-        <h3 class="section-title">
-          <pk-icon name="database" />
-          Database Monitor
-        </h3>
-        <app-db-monitor />
-      </section>
-
-      <!-- PM2 Monitor Section -->
-      <section class="monitor-section">
-        <h3 class="section-title">
-          <pk-icon name="cpu" />
-          PM2 Monitor
-        </h3>
-        <app-pm2-monitor />
-      </section>
-
-      <!-- Nginx Monitor Section -->
-      <section class="monitor-section">
-        <h3 class="section-title">
-          <pk-icon name="home" />
-          Nginx Monitor
-        </h3>
-        <app-nginx-monitor />
-      </section>
-
-      <!-- Secure Log Section -->
-      <section class="monitor-section">
-        <h3 class="section-title">
-          <pk-icon name="shield" />
-          Secure Log
-        </h3>
-        <app-secure-monitor />
-      </section>
+        <div *pkTabPanel="'pm2'" class="monitor-tab-panel">
+          <app-pm2-monitor />
+        </div>
+        <div *pkTabPanel="'nginx'" class="monitor-tab-panel">
+          <app-nginx-monitor />
+        </div>
+        <div *pkTabPanel="'db'" class="monitor-tab-panel">
+          <app-db-monitor />
+        </div>
+        <div *pkTabPanel="'log'" class="monitor-tab-panel">
+          <app-secure-monitor />
+        </div>
+      </pk-tabs>
     </div>
     }
   </main>

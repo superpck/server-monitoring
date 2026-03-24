@@ -163,7 +163,7 @@ export class ServerMonitor implements OnInit {
 
   protected gaugeOption(value: number): EChartsOption {
     const v = Math.max(0, Math.min(100, value));
-    const color = v >= 90 ? '#ef4444' : v >= 75 ? '#f59e0b' : '#22c55e';
+    const color = v >= 90 ? '#ef4444' : v >= 80 ? '#f59e0b' : v >= 70 ? '#00b3ff' : '#22c55e';
     return {
       backgroundColor: 'transparent',
       series: [
