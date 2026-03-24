@@ -209,6 +209,8 @@ Click the **Nginx Log** button on any card to open a modal with two tabs:
 
 Requires `NGINX_LOG_ENABLED=true` on the agent.
 
+> ![Server Monitor](images/server_monitor.png)
+
 ---
 
 ## 5. Alive Monitor
@@ -259,6 +261,8 @@ Each database card displays:
 | Questions | Total queries executed since server startup |
 | Slow Queries | Queries exceeding `long_query_time` |
 
+> ![Database monitor](images/database_screen.png)
+
 ### SQL Query Viewer
 
 Click the **SQL Queries** button on a database card to open the full-screen query viewer.
@@ -266,6 +270,8 @@ Click the **SQL Queries** button on a database card to open the full-screen quer
 - **Columns**: User, DB, Command, Time, State, Query text
 - **Sortable** — click any column header to sort
 - **Auto-reload** — use the selector to refresh automatically (5 s, 10 s, 30 s, or off)
+
+> ![Query](images/query_monitor.png)
 
 ---
 

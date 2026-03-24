@@ -24,6 +24,7 @@ import { ServerContextService } from '../server-management/server-context.servic
 
 export interface ServerEntry {
   key: string;
+  groupid?: number;
   group: string;
   groupDetail?: string;
   detail?: string;
@@ -91,6 +92,7 @@ export class ServerMonitor implements OnInit {
       config.flatMap(({ group, detail, agents }) =>
         agents.map((element: any) => ({
           key: element.name,
+          groupid: element.groupid,
           group,
           groupDetail: detail,
           detail: element.detail,
@@ -102,7 +104,7 @@ export class ServerMonitor implements OnInit {
       )
     );
     const serverEntries = config.flatMap(({ group, agents }) =>
-      agents.map(({ name: key, url: baseUrl, agentid }) => ({ key, group, baseUrl, agentid }))
+      agents.map(({ name: key, url: baseUrl, agentid, groupid }) => ({ key, group, baseUrl, agentid, groupid }))
     );
     interval(5000)
       .pipe(

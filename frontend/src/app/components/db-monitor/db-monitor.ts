@@ -56,6 +56,7 @@ const METRIC_COLOR: Record<TrackedMetric, string> = {
 
 export interface DbServerEntry {
   key: string;
+  groupid?: number;
   group: string;
   groupDetail?: string;
   detail?: string;
@@ -133,6 +134,7 @@ export class DbMonitor implements OnInit {
       config.flatMap(({ group, detail, agents }) =>
         agents.map((element: any) => ({
           key: element.name,
+          groupid: element.groupid,
           group,
           groupDetail: detail,
           detail: element.detail,
@@ -144,7 +146,7 @@ export class DbMonitor implements OnInit {
       )
     );
     const serverEntries = config.flatMap(({ group, agents }) =>
-      agents.map(({ name: key, url: baseUrl, agentid }: any) => ({ key, group, baseUrl, agentid }))
+      agents.map(({ name: key, url: baseUrl, agentid, groupid }: any) => ({ key, group, baseUrl, agentid, groupid }))
     );
     interval(10000)
       .pipe(
