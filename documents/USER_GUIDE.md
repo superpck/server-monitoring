@@ -220,7 +220,7 @@ The **Alive** page gives you a bird's-eye view of every registered agent.
 - Agents are displayed in a tree layout grouped by **Server Group**.
 - Each agent shows its **online / offline** status (checked against the agent's `/system/health` endpoint), along with current CPU, Memory, and Disk percentages when online.
 - The page **auto-refreshes every 10 seconds** so you can see changes without reloading.
-- The status indicator uses colour coding: 🟢 green (healthy), 🟡 yellow (≥70%), 🔴 red / blinking (≥90%), grey (offline).
+- The status indicator uses colour coding: 🟢 green (healthy), 🟡 yellow (≥80%), 🔴 red / blinking (≥90%), grey (offline).
 - An offline agent shows a blinking error badge with the reason.
 - **Click any agent node** to open a detail panel showing CPU, Memory, Disk, Load Average, Network I/O, and Processes.
 - Use the **↔ H / ↕ V** buttons in the top-right to switch between horizontal and vertical tree layouts. Your preference is saved automatically.
