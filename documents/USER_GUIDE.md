@@ -196,7 +196,7 @@ Each agent appears as a card showing:
 | Badge | Meaning |
 |---|---|
 | 🟢 Healthy | All metrics below warning threshold |
-| 🟡 Warning | Any metric ≥ 70% |
+| 🟡 Warning | Any metric ≥ 80% |
 | 🔴 Critical | Any metric ≥ 90% |
 | ⚫ Offline | Agent is unreachable |
 
