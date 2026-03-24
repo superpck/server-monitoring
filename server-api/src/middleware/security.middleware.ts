@@ -38,7 +38,7 @@ function isIpAllowed(ip: string, ranges: string[]): boolean {
  * Environment variables read:
  *   SERVER_KEY          – required; requests must supply X-Server-Key matching this value
  *   SERVER_NAME         – optional; when set, requests must supply X-Server-Name matching this value
- *   ALLOWED_IP_RANGES   – optional; comma-separated CIDR list, e.g. "10.0.0.0/8,203.157.88.1/32"
+ *   ALLOWED_IP_RANGES   – optional; comma-separated CIDR list, e.g. "10.0.0.0/8,192.168.0.1/32"
  *                         When set, only requests from those IP ranges are accepted.
  *
  * If SERVER_KEY is not configured the middleware passes all requests through so the
