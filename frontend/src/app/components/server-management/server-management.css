@@ -237,9 +237,13 @@
 }
 
 .monitoring-sections {
-  padding: 2rem;
+  padding: 1rem 1.5rem 1.5rem;
   overflow-y: auto;
   height: calc(100% - 4.5rem);
+}
+
+.monitor-tab-panel {
+  padding-top: 1.25rem;
 }
 
 .monitor-section {
