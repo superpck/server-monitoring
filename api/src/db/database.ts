@@ -74,4 +74,23 @@ if (userCount === 0) {
   insert.run('user1', 'User Example', hashPassword('User1@1234'), 'monitor', 0)
 }
 
+// ── User access control tables ────────────────────────────────────────────────
+// user_access      : one row per non-admin user → access_type ('all' | 'partial')
+// user_access_agent: agentids visible to a user when access_type = 'partial'
+db.exec(`
+  CREATE TABLE IF NOT EXISTS user_access (
+    userid      INTEGER PRIMARY KEY,
+    access_type TEXT    NOT NULL DEFAULT 'all' CHECK(access_type IN ('all', 'partial')),
+    FOREIGN KEY (userid) REFERENCES users(userid) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS user_access_agent (
+    userid  INTEGER NOT NULL,
+    agentid INTEGER NOT NULL,
+    PRIMARY KEY (userid, agentid),
+    FOREIGN KEY (userid)  REFERENCES users(userid)        ON DELETE CASCADE,
+    FOREIGN KEY (agentid) REFERENCES server_agent(agentid) ON DELETE CASCADE
+  );
+`)
+
 export default db

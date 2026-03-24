@@ -124,4 +124,74 @@ router.delete('/:userid', (req: Request, res: Response) => {
   res.json({ status: 200, success: true })
 })
 
+// ── GET /users/:userid/access ─────────────────────────────────────────────────
+router.get('/:userid/access', (req: Request, res: Response) => {
+  const userid = Number(req.params['userid'])
+  const user = db
+    .prepare<[number], { userid: number; role: string }>('SELECT userid, role FROM users WHERE userid = ?')
+    .get(userid)
+  if (!user) {
+    res.status(404).json({ status: 404, error: 'Not Found', message: 'User not found' })
+    return
+  }
+  // admin always sees everything — no access record needed
+  if (user.role === 'admin') {
+    res.json({ status: 200, access_type: 'all', agents: [] })
+    return
+  }
+  const access = db
+    .prepare<[number], { access_type: string }>('SELECT access_type FROM user_access WHERE userid = ?')
+    .get(userid)
+  const access_type = access?.access_type ?? 'all'
+  const agents = (
+    db
+      .prepare<[number], { agentid: number }>('SELECT agentid FROM user_access_agent WHERE userid = ?')
+      .all(userid)
+  ).map((r) => r.agentid)
+  res.json({ status: 200, access_type, agents })
+})
+
+// ── PUT /users/:userid/access ─────────────────────────────────────────────────
+// Body: { access_type: 'all' | 'partial', agents?: number[] }
+// Only applicable to non-admin users.
+router.put('/:userid/access', (req: Request, res: Response) => {
+  const userid = Number(req.params['userid'])
+  const { access_type, agents = [] } = req.body as { access_type?: string; agents?: number[] }
+
+  const user = db
+    .prepare<[number], { userid: number; role: string }>('SELECT userid, role FROM users WHERE userid = ?')
+    .get(userid)
+  if (!user) {
+    res.status(404).json({ status: 404, error: 'Not Found', message: 'User not found' })
+    return
+  }
+  if (user.role === 'admin') {
+    res.status(400).json({ status: 400, error: 'Bad Request', message: 'Access control does not apply to admin users' })
+    return
+  }
+  if (access_type !== 'all' && access_type !== 'partial') {
+    res.status(400).json({ status: 400, error: 'Bad Request', message: 'access_type must be "all" or "partial"' })
+    return
+  }
+
+  const upsertAccess = db.prepare<[number, string]>(`
+    INSERT INTO user_access (userid, access_type) VALUES (?, ?)
+    ON CONFLICT(userid) DO UPDATE SET access_type = excluded.access_type
+  `)
+  const deleteAgents = db.prepare<[number]>('DELETE FROM user_access_agent WHERE userid = ?')
+  const insertAgent  = db.prepare<[number, number]>('INSERT OR IGNORE INTO user_access_agent (userid, agentid) VALUES (?, ?)')
+
+  db.transaction(() => {
+    upsertAccess.run(userid, access_type)
+    deleteAgents.run(userid)
+    if (access_type === 'partial') {
+      for (const agentid of agents) {
+        insertAgent.run(userid, Number(agentid))
+      }
+    }
+  })()
+
+  res.json({ status: 200, success: true })
+})
+
 export default router

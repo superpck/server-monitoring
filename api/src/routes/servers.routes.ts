@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express'
-import { auth, requireAdmin } from '../middleware/auth.middleware'
+import { JwtPayload } from 'jsonwebtoken'
+import { auth, requireAdmin, optionalAuth } from '../middleware/auth.middleware'
 import db from '../db/database'
 
 const router = Router()
@@ -22,20 +23,37 @@ interface AgentRow {
   seq: number
 }
 
-// ── GET /servers — all groups with their agents (public) ─────────────────────
-router.get('/', (_req: Request, res: Response) => {
+// ── GET /servers — all groups with their agents ──────────────────────────────
+router.get('/', optionalAuth, (req: Request, res: Response) => {
   const groups = db
     .prepare<[], GroupRow>('SELECT groupid, group_name as "group", detail, seq FROM server_group ORDER BY seq, groupid')
     .all()
 
-  const agents = db
+  let agents = db
     .prepare<[], AgentRow>('SELECT agentid, groupid, name, detail, url, server_name, isactive, seq FROM server_agent ORDER BY seq, agentid')
     .all()
 
-  const result = groups.map((g) => ({
-    ...g,
-    agents: agents.filter((a) => a.groupid === g.groupid),
-  }))
+  // ── Apply user access filter for non-admin authenticated users ────────────
+  const user = req.user as JwtPayload | null
+  if (user && typeof user === 'object' && user['role'] !== 'admin' && user['userid'] > 0) {
+    const access = db
+      .prepare<[number], { access_type: string }>('SELECT access_type FROM user_access WHERE userid = ?')
+      .get(user['userid'] as number)
+
+    if (access?.access_type === 'partial') {
+      const allowed = db
+        .prepare<[number], { agentid: number }>('SELECT agentid FROM user_access_agent WHERE userid = ?')
+        .all(user['userid'] as number)
+        .map((r) => r.agentid)
+
+      agents = agents.filter((a) => allowed.includes(a.agentid))
+    }
+    // access_type === 'all' or no entry → no filtering needed
+  }
+
+  const result = groups
+    .map((g) => ({ ...g, agents: agents.filter((a) => a.groupid === g.groupid) }))
+    .filter((g) => g.agents.length > 0)
 
   res.json({ status: 200, groups: result })
 })

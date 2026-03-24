@@ -42,6 +42,26 @@ export function auth(req: Request, res: Response, next: NextFunction): void {
 }
 
 /**
+ * Like `auth` but never rejects — sets req.user if a valid JWT is present,
+ * leaves req.user as null if the token is missing or invalid.
+ * Use for routes that are accessible publicly but behave differently for
+ * authenticated users (e.g. access-filtered data).
+ */
+export function optionalAuth(req: Request, _res: Response, next: NextFunction): void {
+  req.user = null
+  const header = req.headers['authorization']
+  if (header?.startsWith('Bearer ') && JWT_SECRET) {
+    const token = header.slice('Bearer '.length)
+    try {
+      req.user = jwt.verify(token, JWT_SECRET)
+    } catch {
+      // invalid / expired token — treat as unauthenticated
+    }
+  }
+  next()
+}
+
+/**
  * Requires the authenticated user to have role === 'admin'.
  * Must be used AFTER the `auth` middleware.
  */
