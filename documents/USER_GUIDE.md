@@ -43,7 +43,7 @@ Enter your **username** and **password**, then click **Login**.
 > **Important:** Change the default passwords immediately after first login. The `superadmin` account is configured separately in the server environment.
 
 After a successful login the application redirects you to **Server Management**.
-![Login Screen](images/login_screen.png)
+> ![Login Screen](images/login_screen.png)
 
 
 ### Logging Out
