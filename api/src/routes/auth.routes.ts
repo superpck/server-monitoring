@@ -1,17 +1,26 @@
 import { Router, Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
-import { ADMIN_PASSWORD, USER_MONITOR_PASSWORD, JWT_SECRET, JWT_EXPIRES_IN } from '../config'
-import { randomString } from '../utils/util'
+import { SUPERADMIN_PASSWORD, JWT_SECRET, JWT_EXPIRES_IN } from '../config'
+import { randomString, verifyPassword } from '../utils/util'
+import db from '../db/database'
 
 const router = Router()
+
+interface UserRow {
+  userid: number
+  username: string
+  name: string
+  role: string
+  user_admin: number
+  password: string
+}
 
 /**
  * POST /auth/login
  * Body: { username: string, password: string }
  *
+ * Checks DB users first, then falls back to superadmin from .env.
  * Returns a signed JWT on success.
- * The token should be sent on subsequent requests as:
- *   Authorization: Bearer <token>
  */
 router.post('/login', (req: Request, res: Response) => {
   if (!JWT_SECRET) {
@@ -28,11 +37,28 @@ router.post('/login', (req: Request, res: Response) => {
 
   type Role = 'admin' | 'monitor'
   let role: Role | null = null
+  let userAdmin = 0
+  let userid = -1
+  let name='';
 
-  if (username === 'admin' && ADMIN_PASSWORD !== '' && password === ADMIN_PASSWORD) {
-    role = 'admin'
-  } else if (username === 'monitor' && USER_MONITOR_PASSWORD !== '' && password === USER_MONITOR_PASSWORD) {
-    role = 'monitor'
+  // ── 1. superadmin from .env (reserved, not in DB) ─────────────────────────
+  if (username === 'superadmin' && SUPERADMIN_PASSWORD !== '' && password === SUPERADMIN_PASSWORD) {
+    role = 'admin';
+    name = 'Super Admin';
+    userAdmin = 1;
+  }
+
+  // ── 2. DB users ───────────────────────────────────────────────────────────
+  if (!role) {
+    const row = db
+      .prepare<[string], UserRow>('SELECT userid, username, name, role, user_admin, password FROM users WHERE username = ?')
+      .get(username)
+    if (row && verifyPassword(password, row.password)) {
+      role = row.role as Role;
+      userAdmin = row.user_admin || 0;
+      userid = row.userid;
+      name = row.name;
+    }
   }
 
   if (!role) {
@@ -40,12 +66,13 @@ router.post('/login', (req: Request, res: Response) => {
     return
   }
 
-  const token = jwt.sign({ sub: username, role }, JWT_SECRET, {
+  const token = jwt.sign({ userid, sub: username, role, user_admin: userAdmin, name }, JWT_SECRET, {
     expiresIn: JWT_EXPIRES_IN as any,
   })
 
   res.json({ status: 200, token, expiresIn: JWT_EXPIRES_IN })
 })
+
 router.get('/random-string/:len', (req: Request, res: Response) => {
   const len = Number(req.params['len'])
   if (isNaN(len) || len <= 10 || len > 1024) {

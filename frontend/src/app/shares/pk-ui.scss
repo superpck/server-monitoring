@@ -11,13 +11,13 @@
   display: block;
   width: 40px;
   height: 40px;
-  border: 3px solid rgba(0, 0, 0, 0.12);
+  border: 3px solid var(--border-color);
   border-top-color: currentColor;
   border-radius: 50%;
   animation: pk-spin 0.75s linear infinite;
   -webkit-animation: pk-spin 0.75s linear infinite;
   will-change: transform;
-  color: #6c757d;
+  color: var(--color-text-muted);
 
   // ── Display variant ──────────────────────────────────────────────────────────
   &.pk-spinner-inline {
@@ -83,20 +83,21 @@
 .pk-card {
   display: flex;
   flex-direction: column;
-  background-color: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-card);
+  color: var(--color-text);
   overflow: hidden;
 
   .pk-card-header {
     display: flex;
     align-items: center;
     padding: 12px 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid var(--border-color-2);
     font-weight: 600;
     font-size: 0.95rem;
-    background-color: #f8f9fa;
+    background-color: var(--bg-surface-2);
     gap: 8px;
   }
 
@@ -109,8 +110,8 @@
     display: flex;
     align-items: center;
     padding: 10px 16px;
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
-    background-color: #f8f9fa;
+    border-top: 1px solid var(--border-color-2);
+    background-color: var(--bg-surface-2);
     gap: 8px;
   }
 }
@@ -169,3 +170,22 @@ $pk-breakpoints: (
     }
   }
 }
+
+// ─── PK Blink ─────────────────────────────────────────────────────────────────
+
+@keyframes pk-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+@keyframes pk-blink-limited {
+  0%, 62.5% { opacity: 1;   }
+  75%        { opacity: 0.1; }
+  87.5%      { opacity: 0.6; }
+  100%       { opacity: 1;   }
+}
+
+.blink        { animation: pk-blink         1s   step-start infinite; }
+.blink-fast   { animation: pk-blink         0.5s step-start infinite; }
+.blink-smooth { animation: pk-blink         2s   linear    infinite; }
+.blink-slow   { animation: pk-blink-limited 4s   linear    infinite; }

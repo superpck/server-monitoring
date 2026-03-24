@@ -1,0 +1,351 @@
+<div class="demo-page">
+  <h1 class="demo-title">PK UI &mdash; Components &amp; Usage</h1>
+
+  <pk-tabs [tabs]="navTabs" [(activeId)]="activeNavTab">
+
+    <!-- ═══════════ pk-icon ═══════════ -->
+    <div *pkTabPanel="'icon'" class="demo-tab-content">
+      <p class="demo-desc">
+        <code>&lt;pk-icon name="..." [size]="N" [strokeWidth]="N" /&gt;</code>
+      </p>
+
+      <div class="demo-row demo-row--wrap">
+        <label class="demo-label">
+          Size
+          <input type="range" min="12" max="48" step="2" [value]="iconSize()"
+            (input)="iconSize.set(+$any($event.target).value)">
+          <span>{{ iconSize() }}px</span>
+        </label>
+      </div>
+
+      <div class="icon-grid">
+        @for (name of icons; track name) {
+          <div class="icon-cell" [pkTooltip]="name" pkTooltipPosition="top">
+            <pk-icon [name]="name" [size]="iconSize()" />
+            <span class="icon-name">{{ name }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="demo-code">
+        <pre><code>import &#123; PkIcon &#125; from '../shares/pk-icon';
+
+// In component imports: [PkIcon]
+&lt;pk-icon name="check" /&gt;
+&lt;pk-icon name="trash" [size]="20" [strokeWidth]="1.5" /&gt;
+</code></pre>
+      </div>
+    </div>
+
+    <!-- ═══════════ pk-tooltip ═══════════ -->
+    <div *pkTabPanel="'tooltip'" class="demo-tab-content">
+      <p class="demo-desc">
+        <code>[pkTooltip]="text" pkTooltipPosition="top|bottom|left|right" [pkTooltipDelay]="ms"</code>
+      </p>
+
+      <div class="demo-row demo-row--gap">
+        <button class="demo-btn" [pkTooltip]="'Shown on top'" pkTooltipPosition="top">Top</button>
+        <button class="demo-btn" [pkTooltip]="'Shown on bottom'" pkTooltipPosition="bottom">Bottom</button>
+        <button class="demo-btn" [pkTooltip]="'Shown on left'" pkTooltipPosition="left">Left</button>
+        <button class="demo-btn" [pkTooltip]="'Shown on right'" pkTooltipPosition="right">Right</button>
+        <button class="demo-btn" [pkTooltip]="'Delayed 800ms'" [pkTooltipDelay]="800">Delayed 800ms</button>
+        <button class="demo-btn" [pkTooltip]="''">No tooltip (empty string)</button>
+      </div>
+
+      <div class="demo-code">
+        <pre><code>import &#123; PkTooltip &#125; from '../shares/pk-tooltip';
+
+// In component imports: [PkTooltip]
+&lt;button [pkTooltip]="'Click to save'"&gt;Save&lt;/button&gt;
+&lt;span [pkTooltip]="'Hello'" pkTooltipPosition="bottom"&gt;Hover me&lt;/span&gt;
+&lt;span [pkTooltip]="'Delayed'" [pkTooltipDelay]="500"&gt;Delayed&lt;/span&gt;
+</code></pre>
+      </div>
+    </div>
+
+    <!-- ═══════════ pk-modal ═══════════ -->
+    <div *pkTabPanel="'modal'" class="demo-tab-content">
+      <p class="demo-desc">
+        <code>&lt;pk-modal title="..." [isOpen]="bool" size="sm|md|lg|xl|full" (closed)="..."&gt;</code>
+      </p>
+
+      <div class="demo-row demo-row--gap">
+        @for (s of ['sm','md','lg','xl','full']; track s) {
+          <button class="demo-btn" (click)="modalSize.set($any(s)); modalOpen.set(true)">
+            Open {{ s }}
+          </button>
+        }
+      </div>
+
+      <pk-modal title="PkModal Demo" [isOpen]="modalOpen()" [size]="modalSize()" (closed)="modalOpen.set(false)">
+        <p style="margin:0 0 1rem">This is content inside <strong>pk-modal</strong>.</p>
+        <p style="margin:0">Size: <code>{{ modalSize() }}</code> &mdash; Press <kbd>Esc</kbd> or click backdrop to close.</p>
+        <div style="margin-top:1.5rem;display:flex;gap:.5rem;justify-content:flex-end">
+          <button class="demo-btn demo-btn--primary" (click)="modalOpen.set(false)">
+            <pk-icon name="check" [size]="15" /> Confirm
+          </button>
+          <button class="demo-btn" (click)="modalOpen.set(false)">
+            <pk-icon name="x" [size]="15" /> Cancel
+          </button>
+        </div>
+      </pk-modal>
+
+      <div class="demo-code">
+        <pre><code>import &#123; PkModal &#125; from '../shares/pk-modal';
+
+// In component: modalOpen = signal(false)
+&lt;pk-modal title="My Modal" [isOpen]="modalOpen()" size="md" (closed)="modalOpen.set(false)"&gt;
+  &lt;p&gt;Content here&lt;/p&gt;
+&lt;/pk-modal&gt;
+</code></pre>
+      </div>
+    </div>
+
+    <!-- ═══════════ pk-toastr ═══════════ -->
+    <div *pkTabPanel="'toastr'" class="demo-tab-content">
+      <p class="demo-desc">
+        Injected service &mdash; <code>PkToastrService</code>.
+        Requires <code>&lt;pk-toastr /&gt;</code> in root shell.
+      </p>
+
+      <div class="demo-row demo-row--gap">
+        <button class="demo-btn demo-btn--success" (click)="showToast('success')">
+          <pk-icon name="check" [size]="15" /> success()
+        </button>
+        <button class="demo-btn demo-btn--error" (click)="showToast('error')">
+          <pk-icon name="x-circle" [size]="15" /> error()
+        </button>
+        <button class="demo-btn demo-btn--warning" (click)="showToast('warning')">
+          <pk-icon name="alert-circle" [size]="15" /> warning()
+        </button>
+        <button class="demo-btn demo-btn--info" (click)="showToast('info')">
+          <pk-icon name="activity" [size]="15" /> info()
+        </button>
+      </div>
+
+      <div class="demo-code">
+        <pre><code>import &#123; PkToastrService &#125; from '../shares/pk-toastr/pk-toastr.service';
+
+private readonly toastr = inject(PkToastrService);
+
+this.toastr.success('Saved!', 'Success');
+this.toastr.error('Failed to save.', 'Error');
+this.toastr.warning('Check your input.', 'Warning', 5000);
+this.toastr.info('Update available.', 'Info');
+</code></pre>
+      </div>
+    </div>
+
+    <!-- ═══════════ pk-tabs ═══════════ -->
+    <div *pkTabPanel="'tabs'" class="demo-tab-content">
+      <p class="demo-desc">
+        <code>&lt;pk-tabs [tabs]="..." [(activeId)]="..." variant="line|pill"&gt;</code><br>
+        Use the <code>*pkTabPanel="'id'"</code> directive to define each tab's content.
+      </p>
+
+      <h3 class="demo-subtitle">variant=&quot;line&quot; (default)</h3>
+      <pk-tabs [tabs]="demoTabsLine" [(activeId)]="activeLineTab">
+        <div *pkTabPanel="'overview'" class="demo-panel">
+          <strong>Overview</strong> &mdash; Summary of current status.<br>
+          Active tab: <code>{{ activeLineTab() }}</code>
+        </div>
+        <div *pkTabPanel="'details'" class="demo-panel">
+          <strong>Details</strong> &mdash; Full details and configuration.
+        </div>
+        <div *pkTabPanel="'logs'" class="demo-panel">
+          <strong>Logs</strong> &mdash; Activity and event log.
+        </div>
+      </pk-tabs>
+
+      <h3 class="demo-subtitle" style="margin-top:1.5rem">variant=&quot;pill&quot;</h3>
+      <pk-tabs [tabs]="demoTabsPill" [(activeId)]="activePillTab" variant="pill">
+        <div *pkTabPanel="'day'" class="demo-panel">Daily view &mdash; <code>{{ activePillTab() }}</code></div>
+        <div *pkTabPanel="'week'" class="demo-panel">Weekly view</div>
+        <div *pkTabPanel="'month'" class="demo-panel">Monthly view</div>
+      </pk-tabs>
+
+      <div class="demo-code">
+        <pre><code>import &#123; PkTabs, PkTabPanel &#125; from '../shares/pk-tabs';
+import type &#123; PkTab &#125; from '../shares/pk-tabs';
+
+// In component imports: [PkTabs, PkTabPanel]
+
+tabs: PkTab[] = [
+  &#123; id: 'overview', label: 'Overview' &#125;,
+  &#123; id: 'details',  label: 'Details'  &#125;,
+  &#123; id: 'disabled', label: 'Disabled', disabled: true &#125;,
+];
+activeTab = signal('overview');
+
+&lt;pk-tabs [tabs]="tabs" [(activeId)]="activeTab"&gt;
+  &lt;div *pkTabPanel="'overview'"&gt;Overview content&lt;/div&gt;
+  &lt;div *pkTabPanel="'details'"&gt;Details content&lt;/div&gt;
+&lt;/pk-tabs&gt;
+
+&lt;!-- Pill style --&gt;
+&lt;pk-tabs [tabs]="tabs" [(activeId)]="activeTab" variant="pill"&gt; ... &lt;/pk-tabs&gt;
+</code></pre>
+      </div>
+    </div>
+
+    <!-- ═══════════ pk-alert ═══════════ -->
+    <div *pkTabPanel="'alert'" class="demo-tab-content">
+      <p class="demo-desc">
+        Injected service &mdash; <code>PkAlertService</code>.
+        Requires <code>&lt;pk-alert /&gt;</code> in root shell.
+        Returns a <code>Promise</code>.
+      </p>
+
+      @if (alertResult()) {
+        <div class="demo-result">Result: <code>{{ alertResult() }}</code></div>
+      }
+
+      <div class="demo-row demo-row--wrap">
+        <button class="demo-btn demo-btn--success" (click)="showAlert('success')">success()</button>
+        <button class="demo-btn demo-btn--error" (click)="showAlert('error')">error()</button>
+        <button class="demo-btn demo-btn--warning" (click)="showAlert('warning')">warning()</button>
+        <button class="demo-btn demo-btn--info" (click)="showAlert('info')">info()</button>
+        <button class="demo-btn" (click)="showConfirm()">confirm()</button>
+        <button class="demo-btn" (click)="showInput()">input()</button>
+      </div>
+
+      <div class="demo-code">
+        <pre><code>import &#123; PkAlertService &#125; from '../shares/pk-alert/pk-alert.service';
+
+private readonly alert = inject(PkAlertService);
+
+await this.alert.success('Done!');
+await this.alert.error('Failed.', &#123; title: 'Error' &#125;);
+const ok = await this.alert.confirm('Are you sure?', &#123; confirmText: 'Yes' &#125;);
+const val = await this.alert.input('Enter name:', &#123; placeholder: 'Name...' &#125;);
+</code></pre>
+      </div>
+    </div>
+
+    <!-- ═══════════ pk css ═══════════ -->
+    <div *pkTabPanel="'css'" class="demo-tab-content">
+      <p class="demo-desc">
+        Utility CSS classes from <code>shares/pk-ui.scss</code> — import in <code>styles.css</code> or per-component.
+      </p>
+
+      <pk-tabs [tabs]="cssTabs" [(activeId)]="activeCssTab" variant="pill">
+
+        <!-- pk-spinner -->
+        <div *pkTabPanel="'spinner'" class="demo-panel">
+          <div class="demo-row demo-row--gap" style="align-items:center;flex-wrap:wrap;margin-bottom:1rem">
+            <div class="pk-spinner pk-spinner-xs"></div>
+            <div class="pk-spinner pk-spinner-sm"></div>
+            <div class="pk-spinner pk-spinner-md"></div>
+            <div class="pk-spinner pk-spinner-lg"></div>
+            <div class="pk-spinner pk-spinner-xl pk-spinner-success"></div>
+            <div class="pk-spinner pk-spinner-lg pk-spinner-warning"></div>
+            <div class="pk-spinner pk-spinner-lg pk-spinner-info"></div>
+            <div class="pk-spinner pk-spinner-lg pk-spinner-error"></div>
+          </div>
+          <div class="demo-code">
+            <pre><code>&lt;!-- Import in styles.css --&gt;
+@use 'app/shares/pk-ui.scss';
+
+&lt;!-- Sizes: xs | sm | md (default 40px) | lg | xl --&gt;
+&lt;div class="pk-spinner pk-spinner-sm"&gt;&lt;/div&gt;
+
+&lt;!-- Colors: pk-spinner-success | warning | info | error --&gt;
+&lt;div class="pk-spinner pk-spinner-xl pk-spinner-success"&gt;&lt;/div&gt;
+
+&lt;!-- Inline (vertical-align: middle) --&gt;
+&lt;div class="pk-spinner pk-spinner-inline pk-spinner-sm"&gt;&lt;/div&gt;
+</code></pre>
+          </div>
+        </div>
+
+        <!-- pk-card -->
+        <div *pkTabPanel="'card'" class="demo-panel">
+          <div class="pk-card" style="max-width:380px;margin-bottom:1rem">
+            <div class="pk-card-header">
+              <pk-icon name="server" [size]="16" /> Card Header
+            </div>
+            <div class="pk-card-body">
+              This is the <strong>pk-card-body</strong>. Place any content here.
+            </div>
+            <div class="pk-card-footer">
+              <button class="demo-btn demo-btn--primary" style="font-size:.8rem;padding:.3rem .75rem">Action</button>
+              <button class="demo-btn" style="font-size:.8rem;padding:.3rem .75rem">Cancel</button>
+            </div>
+          </div>
+          <div class="demo-code">
+            <pre><code>&lt;div class="pk-card"&gt;
+  &lt;div class="pk-card-header"&gt;Title&lt;/div&gt;
+  &lt;div class="pk-card-body"&gt;Content&lt;/div&gt;
+  &lt;div class="pk-card-footer"&gt;Footer&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+          </div>
+        </div>
+
+        <!-- pk-grid -->
+        <div *pkTabPanel="'grid'" class="demo-panel">
+          <div class="pk-row" style="margin-bottom:.5rem">
+            <div class="pk-col-12"><div class="demo-col-box">pk-col-12</div></div>
+          </div>
+          <div class="pk-row" style="margin-bottom:.5rem">
+            <div class="pk-col-6"><div class="demo-col-box">pk-col-6</div></div>
+            <div class="pk-col-6"><div class="demo-col-box">pk-col-6</div></div>
+          </div>
+          <div class="pk-row" style="margin-bottom:.5rem">
+            <div class="pk-col-4"><div class="demo-col-box">pk-col-4</div></div>
+            <div class="pk-col-4"><div class="demo-col-box">pk-col-4</div></div>
+            <div class="pk-col-4"><div class="demo-col-box">pk-col-4</div></div>
+          </div>
+          <div class="pk-row" style="margin-bottom:1rem">
+            <div class="pk-col-3"><div class="demo-col-box">pk-col-3</div></div>
+            <div class="pk-col-3"><div class="demo-col-box">pk-col-3</div></div>
+            <div class="pk-col-3"><div class="demo-col-box">pk-col-3</div></div>
+            <div class="pk-col-3"><div class="demo-col-box">pk-col-3</div></div>
+          </div>
+          <div class="demo-code">
+            <pre><code>&lt;!-- 12-column grid, breakpoints: xs | sm | md | lg | xl | xxl --&gt;
+&lt;div class="pk-row"&gt;
+  &lt;div class="pk-col-12 pk-col-md-6"&gt;half on md+&lt;/div&gt;
+  &lt;div class="pk-col-12 pk-col-md-6"&gt;half on md+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class="pk-row"&gt;
+  &lt;div class="pk-col-4"&gt;1/3&lt;/div&gt;
+  &lt;div class="pk-col-8"&gt;2/3&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+          </div>
+        </div>
+
+        <!-- blink -->
+        <div *pkTabPanel="'blink'" class="demo-panel">
+          <p class="demo-desc" style="margin-bottom:1rem">
+            Animation utility classes — defined in <code>pk-ui.scss</code>.
+          </p>
+          <div class="demo-row demo-row--gap" style="align-items:center;flex-wrap:wrap;margin-bottom:1rem">
+            <span class="blink demo-blink-box">blink</span>
+            <span class="blink-fast demo-blink-box bg-amber-100">blink-fast</span>
+            <span class="blink-smooth demo-blink-box">blink-smooth</span>
+            <span class="blink-slow demo-blink-box">blink-slow</span>
+          </div>
+          <div class="demo-code">
+            <pre><code>&lt;!-- step-start: on/off every 0.5s --&gt;
+&lt;span class="blink"&gt;Blinking text&lt;/span&gt;
+
+&lt;!-- step-start: on/off every 0.25s --&gt;
+&lt;span class="blink-fast"&gt;Fast blink&lt;/span&gt;
+
+&lt;!-- linear fade: hidden ≈ 0.25s per 2s cycle --&gt;
+&lt;span class="blink-smooth"&gt;Smooth blink&lt;/span&gt;
+
+&lt;!-- linear fade: barely dark per 4s cycle --&gt;
+&lt;span class="blink-slow"&gt;Slow blink&lt;/span&gt;
+</code></pre>
+          </div>
+        </div>
+
+      </pk-tabs>
+    </div>
+
+  </pk-tabs>
+</div>

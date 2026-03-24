@@ -1,0 +1,40 @@
+<div class="pk-tabs" [class.pk-tabs--pill]="variant() === 'pill'">
+  <!-- Tab List -->
+  <div class="pk-tablist" role="tablist" (keydown)="onKeydown($event, 0)">
+    @for (tab of tabs(); track tab.id; let i = $index) {
+      <button
+        class="pk-tab"
+        role="tab"
+        type="button"
+        [id]="'pk-tab-' + tab.id"
+        [attr.aria-selected]="_activeId() === tab.id"
+        [attr.aria-controls]="'pk-panel-' + tab.id"
+        [attr.aria-disabled]="tab.disabled || null"
+        [attr.tabindex]="_activeId() === tab.id ? 0 : -1"
+        [class.pk-tab--active]="_activeId() === tab.id"
+        [class.pk-tab--disabled]="tab.disabled"
+        (click)="select(tab)">
+        {{ tab.label }}
+      </button>
+    }
+  </div>
+
+  <!-- Tab Panels -->
+  @for (tab of tabs(); track tab.id) {
+    <div
+      class="pk-tab-panel"
+      role="tabpanel"
+      [id]="'pk-panel-' + tab.id"
+      [attr.aria-labelledby]="'pk-tab-' + tab.id"
+      [hidden]="_activeId() !== tab.id">
+      @if (_activeId() === tab.id) {
+        <ng-container
+          *ngTemplateOutlet="panelDirectives?.find ? (panelDirectives!.find(p => p.panelId === tab.id)?.templateRef ?? null) : null">
+        </ng-container>
+      }
+    </div>
+  }
+
+  <!-- Fallback: ng-content for simple usage without pkTabPanel directive -->
+  <ng-content />
+</div>

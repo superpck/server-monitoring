@@ -1,12 +1,11 @@
 import { AgentConfig } from './types'
 
 // ── Admin credentials & JWT ───────────────────────────────────────────────────
-export const ADMIN_PASSWORD        = process.env.ADMIN_PASSWORD ?? ''
-export const USER_MONITOR_PASSWORD = process.env.USER_MONITOR_PASSWORD ?? ''
+export const SUPERADMIN_PASSWORD   = process.env.SUPERADMIN_PASSWORD ?? ''
 export const JWT_SECRET            = process.env.JWT_SECRET ?? ''
 export const JWT_EXPIRES_IN        = (process.env.JWT_EXPIRES_IN ?? '8h') as string
 
-if (!ADMIN_PASSWORD) console.error('[config] ADMIN_PASSWORD is not set')
+if (!SUPERADMIN_PASSWORD) console.error('[config] SUPERADMIN_PASSWORD is not set')
 if (!JWT_SECRET)     console.error('[config] JWT_SECRET is not set — login will fail')
 
 // ── Machine-to-machine static key (optional fallback) ────────────────────────

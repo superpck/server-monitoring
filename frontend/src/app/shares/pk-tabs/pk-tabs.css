@@ -1,0 +1,94 @@
+/* ── Host ── */
+:host {
+  display: block;
+}
+
+/* ── Tab List ── */
+.pk-tablist {
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+  border-bottom: 2px solid var(--border-color);
+  margin-bottom: 1.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.pk-tablist::-webkit-scrollbar { display: none; }
+
+/* ── Tab Button (line variant) ── */
+.pk-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.1rem;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+  border-radius: 4px 4px 0 0;
+}
+
+.pk-tab:hover:not(.pk-tab--disabled) {
+  color: var(--color-text);
+}
+
+.pk-tab--active {
+  color: var(--color-text-em);
+  border-bottom-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.pk-tab--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.pk-tab:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: -2px;
+}
+
+/* ── Pill Variant ── */
+.pk-tabs--pill .pk-tablist {
+  border-bottom: none;
+  background: var(--bg-nav-hover, rgba(0,0,0,0.06));
+  border-radius: 10px;
+  padding: 4px;
+  gap: 2px;
+  margin-bottom: 1.25rem;
+}
+
+.pk-tabs--pill .pk-tab {
+  border-bottom: none;
+  margin-bottom: 0;
+  border-radius: 7px;
+  padding: 0.4rem 1rem;
+}
+
+.pk-tabs--pill .pk-tab--active {
+  background: var(--bg-nav, #fff);
+  color: var(--color-text-em);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+  border-bottom-color: transparent;
+}
+
+.pk-tabs--pill .pk-tab:hover:not(.pk-tab--disabled):not(.pk-tab--active) {
+  background: var(--bg-nav, rgba(255,255,255,0.5));
+}
+
+/* ── Panel ── */
+.pk-tab-panel {
+  outline: none;
+}
+
+.pk-tab-panel[hidden] {
+  display: none;
+}

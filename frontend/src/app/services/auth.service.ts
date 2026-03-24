@@ -4,7 +4,9 @@ import config from '../configs/config';
 interface JwtPayload {
   sub: string;
   role: string;
+  user_admin: number;
   exp: number;
+  name?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -13,7 +15,9 @@ export class AuthService {
   private _expiryTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly isAdmin = computed(() => this._payload()?.role === 'admin');
+  readonly isUserAdmin = computed(() => this._payload()?.user_admin === 1);
   readonly username = computed(() => this._payload()?.sub ?? '');
+  readonly displayName = computed(() => this._payload()?.name || this._payload()?.sub || '');
 
   private readPayload(): JwtPayload | null {
     try {

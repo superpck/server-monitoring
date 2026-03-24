@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
 import { adminGuard } from './guards/admin.guard';
+import { userAdminGuard } from './guards/user-admin.guard';
 
 export const routes: Routes = [
   {
@@ -32,12 +33,21 @@ export const routes: Routes = [
         loadComponent: () => import('./components/server-config/server-config').then((m) => m.ServerConfig),
       },
       {
+        path: 'user-management',
+        canActivate: [userAdminGuard],
+        loadComponent: () => import('./components/user-management/user-management').then((m) => m.UserManagement),
+      },
+      {
         path: 'alive',
         loadComponent: () => import('./components/alive/alive').then((m) => m.Alive),
       },
       {
         path: 'about',
         loadComponent: () => import('./components/about/about').then((m) => m.About),
+      },
+      {
+        path: 'pk-ui',
+        loadComponent: () => import('./components/pk-ui-demo/pk-ui-demo').then((m) => m.PkUiDemo),
       },
       {
         path: '404',

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
 import { PkIcon } from '../../shares/pk-icon';
@@ -18,6 +18,8 @@ export class Layout implements OnInit, OnDestroy {
   protected readonly themeService = inject(ThemeService);
   protected readonly auth = inject(AuthService);
   protected readonly appName = config.appName;
+  protected readonly menuOpen = signal(false);
+  protected readonly userMenuOpen = signal(false);
 
   ngOnInit(): void {
     this.auth.startExpiryWatch(() => this.router.navigateByUrl('/login'));
@@ -25,6 +27,14 @@ export class Layout implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.auth.stopExpiryWatch();
+  }
+
+  protected closeMenu(): void {
+    this.menuOpen.set(false);
+  }
+
+  protected closeUserMenu(): void {
+    this.userMenuOpen.set(false);
   }
 
   protected logout(): void {

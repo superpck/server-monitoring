@@ -1,0 +1,164 @@
+<div class="um-page">
+  <div class="um-header">
+    <div class="um-title-row">
+      <pk-icon name="user" [size]="20" />
+      <h1 class="um-title">User Management</h1>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="openAddUser()">
+      + Add User
+    </button>
+  </div>
+
+  @if (loading()) {
+  <div class="um-loading">
+    <span class="spinner"></span> Loading…
+  </div>
+  } @else if (users().length === 0) {
+  <div class="um-empty">
+    <pk-icon name="user" [size]="40" />
+    <p>No users found.</p>
+  </div>
+  } @else {
+  <div class="um-card">
+    <table class="um-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Username</th>
+          <th>Name</th>
+          <th>Role</th>
+          <th>User Admin</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (user of users(); track user.userid) {
+        <tr>
+          <td class="td-id">{{ user.userid }}</td>
+          <td class="td-username">
+            {{ user.username }}
+            @if (isSelf(user)) {
+            <span class="badge-self">you</span>
+            }
+          </td>
+          <td>{{ user.name || '—' }}</td>
+          <td>
+            <span class="badge-role" [class.badge-role--admin]="user.role === 'admin'">
+              {{ user.role }}
+            </span>
+          </td>
+          <td>
+            <span class="badge-admin" [class.badge-admin--yes]="user.user_admin === 1">
+              {{ user.user_admin === 1 ? 'Yes' : 'No' }}
+            </span>
+          </td>
+          <td class="td-actions">
+            <button type="button" class="btn btn-xs btn-ghost" title="Edit" (click)="openEditUser(user)">
+              <pk-icon name="pencil" [size]="13" />
+            </button>
+            <button type="button" class="btn btn-xs btn-danger-ghost" title="Delete" [disabled]="isSelf(user)"
+              [title]="isSelf(user) ? 'Cannot delete your own account' : 'Delete'"
+              (click)="!isSelf(user) && confirmDeleteUser(user)">
+              <pk-icon name="x-circle" [size]="13" />
+            </button>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  }
+</div>
+
+<!-- ── Add / Edit Modal ──────────────────────────────────────────────────── -->
+<pk-modal [title]="isEditing() ? 'Edit User' : 'Add User'" [isOpen]="modalOpen()" size="sm"
+  (closed)="modalOpen.set(false)">
+
+  <div class="form-body">
+    <!-- @if (!isEditing()) { -->
+    <div class="form-field">
+      <label class="form-label">Username <span class="required">*</span></label>
+      <input type="text" class="form-input" placeholder="e.g. john" autocomplete="off" [value]="userForm().username"
+        [disabled]="isEditing()" (input)="updateForm({ username: $any($event.target).value })" />
+    </div>
+    <!-- } -->
+
+    <div class="form-field">
+      <label class="form-label">Full Name</label>
+      <input type="text" class="form-input" placeholder="e.g. john doe" [value]="userForm().name"
+        (input)="updateForm({ name: $any($event.target).value })" />
+    </div>
+
+    <div class="form-field">
+      <label class="form-label">{{ isEditing() ? 'New Password' : 'Password' }} {{ isEditing() ? '' : '*' }}</label>
+      <div class="input-secret-wrap">
+        <input [type]="showPassword() ? 'text' : 'password'" class="form-input input-secret"
+          [placeholder]="isEditing() ? 'Leave blank to keep current' : 'Password'" autocomplete="new-password"
+          [value]="userForm().password" (input)="updateForm({ password: $any($event.target).value })" />
+        <button type="button" class="btn-show-key" (click)="showPassword.update(v => !v)"
+          [title]="showPassword() ? 'Hide' : 'Show'">
+          @if (showPassword()) {
+          <pk-icon name="eye-off" [size]="15" />
+          } @else {
+          <pk-icon name="eye" [size]="15" />
+          }
+        </button>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label class="form-label">Role</label>
+      <select class="form-input" [value]="userForm().role" (change)="updateForm({ role: $any($event.target).value })">
+        <option value="monitor">monitor</option>
+        <option value="admin">admin</option>
+      </select>
+    </div>
+    <div style="display: flex; align-items: center;">
+      <label class="toggle-switch">
+        <input type="checkbox" [checked]="userForm().user_admin === 1"
+          (change)="updateForm({ user_admin: $any($event.target).checked ? 1 : 0 })" />
+        <span class="toggle-track"></span>
+      </label>
+      <label class="form-label" style="margin-left: 10px;">User CRUD Admin</label>
+    </div>
+  </div>
+
+  <div class="modal-footer" pk-modal-footer>
+    <button type="button" class="btn btn-ghost" (click)="modalOpen.set(false)">
+      <pk-icon name="x" [size]="14" /> Cancel
+    </button>
+    <button type="button" class="btn btn-primary"
+      [disabled]="saving() || !userForm().name.trim() || (!isEditing() && !userForm().username.trim()) || (!isEditing() && !userForm().password.trim())"
+      (click)="saveUser()">
+      @if (saving()) {
+        <span class="spinner spinner-sm"></span>
+      } @else {
+        <pk-icon name="save" [size]="14" />
+      }
+      Save
+    </button>
+  </div>
+</pk-modal>
+
+<!-- ── Delete Confirm Modal ──────────────────────────────────────────────── -->
+<pk-modal title="Confirm Delete" [isOpen]="deleteModalOpen()" size="sm" (closed)="deleteModalOpen.set(false)">
+
+  <div class="delete-body">
+    <pk-icon name="alert-circle" [size]="36" class="delete-icon" />
+    <p>Delete user <strong>{{ deleteTarget()?.label }}</strong>?</p>
+  </div>
+
+  <div class="modal-footer" pk-modal-footer>
+    <button type="button" class="btn btn-ghost" (click)="deleteModalOpen.set(false)">
+      <pk-icon name="x" [size]="14" /> Cancel
+    </button>
+    <button type="button" class="btn btn-danger" [disabled]="saving()" (click)="confirmDelete()">
+      @if (saving()) {
+        <span class="spinner spinner-sm"></span>
+      } @else {
+        <pk-icon name="trash" [size]="14" />
+      }
+      Delete
+    </button>
+  </div>
+</pk-modal>
