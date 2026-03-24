@@ -1,0 +1,64 @@
+<ng-template #nodeTemplate let-node>
+  <li
+    class="pk-tree-item"
+    role="treeitem"
+    [attr.aria-selected]="selectedId() === node.id"
+    [attr.aria-expanded]="hasChildren(node) ? isExpanded(node.id) : null"
+    [attr.aria-disabled]="node.disabled || null"
+  >
+    <div
+      class="pk-tree-row"
+      [class.pk-tree-row--selected]="!checkable() && selectedId() === node.id"
+      [class.pk-tree-row--disabled]="node.disabled"
+      (click)="rowClick(node, $event)"
+    >
+      <button
+        type="button"
+        class="pk-tree-toggle"
+        [class.pk-tree-toggle--leaf]="!hasChildren(node)"
+        [class.pk-tree-toggle--expanded]="isExpanded(node.id)"
+        (click)="toggle(node, $event)"
+        [attr.aria-label]="isExpanded(node.id) ? 'Collapse' : 'Expand'"
+        tabindex="-1"
+      >
+        @if (hasChildren(node)) {
+          <pk-icon name="chevron-right" [size]="14" />
+        }
+      </button>
+
+      @if (checkable()) {
+        <input
+          type="checkbox"
+          class="pk-tree-check"
+          [checked]="isChecked(node)"
+          [indeterminate]="isIndeterminate(node)"
+          (click)="toggleCheck(node, $event)"
+          tabindex="-1" />
+      }
+
+      @if (node.icon) {
+        <pk-icon class="pk-tree-icon" [name]="node.icon" [size]="16" />
+      }
+
+      <span class="pk-tree-label">{{ node.label }}</span>
+
+      @if (node.badge !== undefined && node.badge !== null) {
+        <span class="pk-tree-badge" [class]="node.badgeClass ?? ''">{{ node.badge }}</span>
+      }
+    </div>
+
+    @if (hasChildren(node) && isExpanded(node.id)) {
+      <ul class="pk-tree-children" role="group">
+        @for (child of node.children!; track child.id) {
+          <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: child }"></ng-container>
+        }
+      </ul>
+    }
+  </li>
+</ng-template>
+
+<ul class="pk-treeview" role="tree">
+  @for (node of nodes(); track node.id) {
+    <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: node }"></ng-container>
+  }
+</ul>
