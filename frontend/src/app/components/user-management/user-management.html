@@ -147,7 +147,7 @@
 </pk-modal>
 
 <!-- ── Access Modal ─────────────────────────────────────────────────────── -->
-<pk-modal [title]="'Access: ' + (accessTarget()?.name || accessTarget()?.username || '')" [isOpen]="accessModalOpen()" size="sm"
+<pk-modal [title]="'Access: ' + (accessTarget()?.name || accessTarget()?.username || '')" [isOpen]="accessModalOpen()" size="md"
   [disableBackdropClose]="true"
   (closed)="accessModalOpen.set(false)">
 
@@ -165,14 +165,12 @@
       </select>
     </div>
     @if (accessType() === 'partial') {
-    <div class="agent-list">
-      @for (agent of accessAgentList(); track agent.agentid) {
-      <label class="agent-item">
-        <input type="checkbox" [checked]="agent.checked" (change)="toggleAgentAccess(agent.agentid)" />
-        <span class="agent-name">{{ agent.name }}</span>
-        <span class="agent-group">{{ agent.group }}</span>
-      </label>
-      }
+    <div class="access-tree-wrap">
+      <pk-treeview
+        [nodes]="accessTreeNodes()"
+        [checkable]="true"
+        [(checkedIds)]="accessCheckedIds"
+        [expandAll]="true" />
     </div>
     }
   </div>

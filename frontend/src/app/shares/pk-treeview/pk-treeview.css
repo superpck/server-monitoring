@@ -1,0 +1,133 @@
+.pk-treeview,
+.pk-tree-children {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.pk-treeview {
+  --tree-indent: 16px;
+}
+
+/* Nested children indented with a vertical guide line */
+.pk-tree-children {
+  padding-left: var(--tree-indent);
+  border-left: 1px solid var(--tree-line-color, rgba(100, 116, 139, 0.25));
+  margin-left: 11px;
+}
+
+.pk-tree-item {
+  display: block;
+}
+
+/* ── Row ─────────────────────────────────────────────── */
+.pk-tree-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px 4px 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  color: var(--color-text, #f1f5f9);
+  transition: background 0.15s;
+  min-height: 30px;
+}
+
+.pk-tree-row:hover:not(.pk-tree-row--disabled) {
+  background: var(--bg-nav-hover, rgba(148, 163, 184, 0.08));
+}
+
+.pk-tree-row--selected {
+  background: var(--primary-color, #3b82f6);
+  color: #fff;
+}
+
+.pk-tree-row--selected:hover {
+  background: var(--primary-color, #3b82f6);
+}
+
+.pk-tree-row--disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ── Expand / Collapse toggle ────────────────────────── */
+.pk-tree-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  border-radius: 4px;
+  transition: transform 0.2s;
+}
+
+.pk-tree-toggle:hover {
+  background: rgba(148, 163, 184, 0.15);
+}
+
+.pk-tree-toggle--leaf {
+  pointer-events: none;
+}
+
+.pk-tree-toggle--expanded {
+  transform: rotate(90deg);
+}
+
+/* ── Icon ────────────────────────────────────────────── */
+.pk-tree-icon {
+  flex-shrink: 0;
+  color: inherit;
+  opacity: 0.7;
+}
+
+.pk-tree-row--selected .pk-tree-icon {
+  opacity: 1;
+}
+
+/* ── Label ───────────────────────────────────────────── */
+.pk-tree-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+/* ── Badge ───────────────────────────────────────────── */
+.pk-tree-badge {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--bg-nav-hover, rgba(148, 163, 184, 0.12));
+  color: var(--text-secondary, #cbd5e1);
+  font-weight: 600;
+  min-width: 20px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.pk-tree-row--selected .pk-tree-badge {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+/* ── Checkbox (checkable mode) ───────────────────────────────────────────── */
+.pk-tree-check {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  accent-color: var(--primary-color, #3b82f6);
+  cursor: pointer;
+  margin: 0;
+}

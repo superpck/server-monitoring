@@ -9,6 +9,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { PkIcon } from '../../shares/pk-icon';
 import { PkModal } from '../../shares/pk-modal';
+import { PkTreeview, type TreeNode } from '../../shares/pk-treeview';
 import { PkToastrService } from '../../shares/pk-toastr';
 import { UserManagementService, User, UserAccess } from '../../services/user-management.service';
 import { ServerConfigService } from '../../services/server-config.service';
@@ -22,16 +23,9 @@ interface UserForm {
   password: string;
 }
 
-interface AgentItem {
-  agentid: number;
-  name: string;
-  group: string;
-  checked: boolean;
-}
-
 @Component({
   selector: 'app-user-management',
-  imports: [FormsModule, PkIcon, PkModal],
+  imports: [FormsModule, PkIcon, PkModal, PkTreeview],
   templateUrl: './user-management.html',
   styleUrl: './user-management.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -62,7 +56,8 @@ export class UserManagement implements OnInit {
   protected readonly accessModalOpen = signal(false);
   protected readonly accessTarget = signal<User | null>(null);
   protected readonly accessType = signal<'all' | 'partial'>('all');
-  protected readonly accessAgentList = signal<AgentItem[]>([]);
+  protected readonly accessTreeNodes = signal<TreeNode[]>([]);
+  protected readonly accessCheckedIds = signal<Set<string | number>>(new Set());
   protected readonly accessLoading = signal(false);
   protected readonly accessSaving = signal(false);
 
@@ -178,7 +173,8 @@ export class UserManagement implements OnInit {
   protected async openAccessModal(user: User): Promise<void> {
     this.accessTarget.set(user);
     this.accessType.set('all');
-    this.accessAgentList.set([]);
+    this.accessTreeNodes.set([]);
+    this.accessCheckedIds.set(new Set());
     this.accessLoading.set(true);
     this.accessModalOpen.set(true);
     try {
@@ -187,16 +183,19 @@ export class UserManagement implements OnInit {
         this.serverConfig.getAll(),
       ]);
       this.accessType.set(access.access_type);
-      const allowedSet = new Set(access.agents);
-      const items: AgentItem[] = groups.flatMap(g =>
-        g.agents.map(a => ({
-          agentid: a.agentid,
-          name: a.name,
-          group: g.group,
-          checked: allowedSet.has(a.agentid),
-        }))
-      );
-      this.accessAgentList.set(items);
+      const treeNodes: TreeNode[] = groups
+        .filter(g => g.agents && g.agents.length > 0)
+        .map(g => ({
+          id: 'g:' + g.group,
+          label: g.group,
+          icon: 'server',
+          children: g.agents.map(a => ({
+            id: a.agentid,
+            label: a.name,
+          })),
+        }));
+      this.accessTreeNodes.set(treeNodes);
+      this.accessCheckedIds.set(new Set<string | number>(access.agents));
     } catch {
       this.toastr.error('Failed to load access data');
       this.accessModalOpen.set(false);
@@ -205,17 +204,11 @@ export class UserManagement implements OnInit {
     }
   }
 
-  protected toggleAgentAccess(agentid: number): void {
-    this.accessAgentList.update(list =>
-      list.map(a => a.agentid === agentid ? { ...a, checked: !a.checked } : a)
-    );
-  }
-
   protected async saveAccess(): Promise<void> {
     const user = this.accessTarget();
     if (!user) return;
     const accessType = this.accessType();
-    const agents = this.accessAgentList().filter(a => a.checked).map(a => a.agentid);
+    const agents = Array.from(this.accessCheckedIds()).filter((id): id is number => typeof id === 'number');
     this.accessSaving.set(true);
     try {
       await this.svc.updateAccess(user.userid, {

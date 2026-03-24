@@ -183,8 +183,8 @@ Then open [http://localhost:4204](http://localhost:4204), log in, and add your s
 ## Screenshots
 
 **Login**  
-![Login Screen](documents/login_screen.png)
+![Login Screen](documents/images/login_screen.png)
 
 **About**  
-![About Screen](documents/about_screen.png)
+![About Screen](documents/images/about_screen.png)
 
