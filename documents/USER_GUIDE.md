@@ -230,10 +230,15 @@ By default every non-admin user can see **all agents**. You can restrict a user 
 
 1. Find the user in the User Management table.
 2. Click the **🔑 key icon** in the Actions column (visible only for non-admin users).
-3. In the **Agent Access** modal, choose:
+3. In the **Agent Access** modal, choose the **Access Type**:
    - **All Agents** — the user sees every active agent (default).
-   - **Partial Access** — a checklist of all agents appears; tick the ones this user is allowed to see.
-4. Click **Save**.
+   - **Partial Access** — a collapsible tree of server groups and agents appears.
+4. When **Partial Access** is selected, use the tree to pick which agents this user may access:
+   - **Check a group** — selects all agents inside that group at once.
+   - **Uncheck a group** — deselects all agents in that group.
+   - **Check / uncheck individual agents** — fine-grained control within a group.
+   - A group checkbox shows a **dash (—)** when only some of its agents are selected.
+5. Click **Save**.
 
 The restriction applies immediately. The user will only see the permitted agents in the Server Management sidebar and Alive monitor.
 
