@@ -10,8 +10,8 @@ This guide covers everything a day-to-day user needs: logging in, navigating the
 1. [Getting Started](#1-getting-started)  
 2. [Navigation Overview](#2-navigation-overview)  
 3. [Server Management](#3-server-management)  
-   - [System Overview](#31-system-overview)  
-   - [Server Monitor](#32-server-monitor)  
+   - [Agent Overview](#31-agent-overview)  
+   - [System Monitor](#32-system-monitor)  
    - [PM2 Monitor](#33-pm2-monitor)  
    - [Nginx Monitor](#34-nginx-monitor)  
    - [Database Monitor](#35-database-monitor)  
@@ -79,14 +79,14 @@ Once a server agent is selected, six monitoring tabs are available across the to
 
 | Tab | Description |
 |---|---|
-| System Overview | High-level health summary |
-| Server Monitor | Real-time CPU, Memory, Disk, and Network charts |
+| Agent Overview | High-level health summary |
+| System Monitor | Real-time CPU, Memory, Disk, and Network charts |
 | PM2 Monitor | PM2 process list and status |
 | Nginx Monitor | Nginx service status and access/error logs |
 | Database Monitor | Database connection checks and query metrics |
 | Log Monitor | Security and system log viewer |
 
-### 3.1 System Overview
+### 3.1 Agent Overview
 
 Displays a compact summary of the selected server:
 
@@ -99,7 +99,7 @@ Displays a compact summary of the selected server:
 
 A colour-coded indicator (green / yellow / red) gives an at-a-glance health status for each metric.
 
-### 3.2 Server Monitor
+### 3.2 System Monitor
 
 Interactive charts (powered by Apache ECharts) that update periodically:
 
@@ -163,10 +163,13 @@ Requires `SECURE_LOG_ENABLED=true` on the agent.
 
 The **Alive** page gives you a bird's-eye view of every registered agent.
 
-- Agents are listed in an expandable tree grouped by **Server Group**.
-- Each agent shows its **online / offline** status (checked against the agent's `/system/health` endpoint).
+- Agents are displayed in a tree layout grouped by **Server Group**.
+- Each agent shows its **online / offline** status (checked against the agent's `/system/health` endpoint), along with current CPU, Memory, and Disk percentages when online.
 - The page **auto-refreshes every 10 seconds** so you can see changes without reloading.
-- An offline agent is highlighted in red to draw immediate attention.
+- The status indicator uses colour coding: 🟢 green (healthy), 🟡 yellow (≥70%), 🔴 red / blinking (≥90%), grey (offline).
+- An offline agent shows a blinking error badge with the reason.
+- **Click any agent node** to open a detail panel showing CPU, Memory, Disk, Load Average, Network I/O, and Processes.
+- Use the **↔ H / ↕ V** buttons in the top-right to switch between horizontal and vertical tree layouts. Your preference is saved automatically.
 
 > ![Server Alive](images/server_alive_horizontal.png)
 > ![Server Alive](images/server_alive_vertical.png)
@@ -225,7 +228,7 @@ The **User Management** page lists all registered accounts.
   - User Admin — whether this account can manage other users
   - Password (minimum length enforced)
 - **Edit User** — click the **pencil** icon on a user row to update name, role, user_admin flag, or password (leave password blank to keep the existing one).
-- **Delete User** — click the **× circle** icon. You cannot delete the `superadmin` account.
+- **Delete User** — click the **× circle** icon. You cannot delete the `superadmin` account or your own account.
 
 > ![user list](images/userlist.png)
 
