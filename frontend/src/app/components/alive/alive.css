@@ -375,6 +375,11 @@
   color: #fbbf24;
 }
 
+.metric--sky {
+  background: rgba(44, 181, 240, 0.15);
+  color: #00b3ff;
+}
+
 .metric--red {
   background: rgba(248, 113, 113, 0.15);
   color: #f87171;

@@ -128,6 +128,7 @@ export class Alive implements OnInit {
     if (value == null) return 'metric--null';
     if (value >= 90) return 'metric--red blink-smooth';
     if (value >= 80) return 'metric--yellow';
+    if (value >= 70) return 'metric--sky';
     return 'metric--green';
   }
 
